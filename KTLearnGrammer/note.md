@@ -30,7 +30,7 @@
 ![testpic](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png "Pic example")
 
 ## 超链接
-[My Github]("https://github.com/pananfly")  
+[My Github](https://github.com/pananfly)  
 <a href="https://github.com/pananfly" target="_blank">My Github</a>
 
 ## 列表
@@ -79,8 +79,63 @@ st=>start: Start
 op=>operation: Operation  
 cond=>condition: Yes or No?  
 e=>end: End  
-
-st->op->cond  
+st->op->cond->e 
 cond(yes)->e  
 cond(no)->op  
+```
+
+```flow
+st=>start: Start
+i=>inputoutput: 输入年份n
+cond1=>condition: n能否被4整除？
+cond2=>condition: n能否被100整除？
+cond3=>condition: n能否被400整除？
+o1=>inputoutput: 输出非闰年
+o2=>inputoutput: 输出非闰年
+o3=>inputoutput: 输出闰年
+o4=>inputoutput: 输出闰年
+e=>end
+
+st->i->cond1
+cond1(no)->o1->e
+cond1(yes)->cond2
+cond2(no)->o3->e
+cond2(yes)->cond3
+cond3(yes)->o2->e
+cond3(no)->o4->e
+```
+
+```flow
+s=>start: 开始
+e=>end: 结束
+o=>operation: 操作项
+
+s->o->e
+```
+
+```mermaid
+graph LR 
+ A --> B;
+ B --> C;
+ C --> A;
+```
+
+```puml
+A --> B
+```
+
+```dot {engin="circo"}
+digraph G {
+  A -> B
+  B -> C
+  B -> D
+}
+```
+
+```seq
+Title: Here is a title
+A->B: Normal line
+B-->C: Dashed line
+C->>D: Open arrow
+D-->>A: Dashed open arrow
 ```
