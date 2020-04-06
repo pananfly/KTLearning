@@ -4,12 +4,26 @@
 
 ----ÒÔÏÂÅäÖÃ¹ıµÄÂÔ¹ı---
 3.±¾µØ´´½¨ssh key:ssh-keygen -t rsa -C "×Ô¼ºµÄÓÊÏä"
-3.1´´½¨ºÃºóÕÒµ½id_rsa.pub´ò¿ª²¢¸ºÖµÀïÃæµÄÄÚÈİ
+
+3.1´´½¨ºÃºóÕÒµ½id_rsa.pub´ò¿ª²¢¸´ÖÆÀïÃæµÄÄÚÈİ
 3.2ÔÚgithubÍøÕ¾µÄSettingÖÖÌí¼ÓSSH Key,titleËæ±ãĞ´£¬keyÕ³Ìù¸Õ²Åid_rsa.pubÎÄ¼şÀïµÄÄÚÈİ
 3.3ÑéÖ¤ÊÇ·ñ³É¹¦:ssh -T git@github.com, ÌáÊ¾You¡¯ve successfully authenticated, but GitHub does not provide shell access¼´¿É¡£
+
+--ÅäÖÃÈ«¾ÖÕËºÅ--
 3.4ÅäÖÃgithubÓÃ»§ÃûºÍÓÊÏä:
 git config --global user.name "ÄãµÄÓÃ»§Ãû"
 git config --global user.email "ÄãµÄÓÊÏä"
+
+--ÅäÖÃ¶àÕËºÅ--
+3.Ö¸ÁîÖ´ĞĞºó£¬ÔÚ´´½¨keyÊ±Ö¸¶¨×Ô¼ºµÄÎÄ¼şÃû Èçid_rsa_github
+ÔÚ.sshÎÄ¼ş¼Ğ´´½¨configÎÄ¼ş£¬ÔÚÎÄ¼şÀïÊäÈë
+#github
+	Host github.com
+	HostName github.com
+	IdentityFile your dirs/.ssh/id_rsa_github ££id_rsa_githubid_rsa_githubÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+	User pananfly
+3.1Óë3.2²Ù×÷	
+3.3Í¬ÑùµÄ²Ù×÷ÑéÖ¤ÕËºÅ
 ------
 
 4.ÔÚ½«ÒªÉÏ´«µÄ±¾µØÏîÄ¿Ä¿Â¼ÔËĞĞ:git remote add origin git@github.com:ÄãµÄÓÃ»§Ãû/ÄãµÄÏîÄ¿Ãû³Æ.git
@@ -76,15 +90,15 @@ git diff --stat # ½ö½ö±È½ÏÍ³¼ÆĞÅÏ¢
 Git ±¾µØ·ÖÖ§¹ÜÀí
 ²é¿´¡¢ÇĞ»»¡¢´´½¨ºÍÉ¾³ı·ÖÖ§£º
 
-git br -r # ²é¿´Ô¶³Ì·ÖÖ§
+git branch -r # ²é¿´Ô¶³Ì·ÖÖ§
 
-git br <new_branch> # ´´½¨ĞÂµÄ·ÖÖ§
+git branch <new_branch> # ´´½¨ĞÂµÄ·ÖÖ§
 
-git br -v # ²é¿´¸÷¸ö·ÖÖ§×îºóÌá½»ĞÅÏ¢
+git branch -v # ²é¿´¸÷¸ö·ÖÖ§×îºóÌá½»ĞÅÏ¢
 
-git br --merged # ²é¿´ÒÑ¾­±»ºÏ²¢µ½µ±Ç°·ÖÖ§µÄ·ÖÖ§
+git branch --merged # ²é¿´ÒÑ¾­±»ºÏ²¢µ½µ±Ç°·ÖÖ§µÄ·ÖÖ§
 
-git br --no-merged # ²é¿´ÉĞÎ´±»ºÏ²¢µ½µ±Ç°·ÖÖ§µÄ·ÖÖ§
+git branch --no-merged # ²é¿´ÉĞÎ´±»ºÏ²¢µ½µ±Ç°·ÖÖ§µÄ·ÖÖ§
 
 git co <branch> # ÇĞ»»µ½Ä³¸ö·ÖÖ§
 
@@ -96,9 +110,9 @@ git co $id # °ÑÄ³´ÎÀúÊ·Ìá½»¼ÇÂ¼checkout³öÀ´£¬µ«ÎŞ·ÖÖ§ĞÅÏ¢£¬ÇĞ»»µ½ÆäËû·ÖÖ§»á×Ô¶¯É
 
 git co $id -b <new_branch> # °ÑÄ³´ÎÀúÊ·Ìá½»¼ÇÂ¼checkout³öÀ´£¬´´½¨³ÉÒ»¸ö·ÖÖ§
 
-git br -d <branch> # É¾³ıÄ³¸ö·ÖÖ§
+git branch -d <branch> # É¾³ıÄ³¸ö·ÖÖ§
 
-git br -D <branch> # Ç¿ÖÆÉ¾³ıÄ³¸ö·ÖÖ§ (Î´±»ºÏ²¢µÄ·ÖÖ§±»É¾³ıµÄÊ±ºòĞèÒªÇ¿ÖÆ)
+git branch -D <branch> # Ç¿ÖÆÉ¾³ıÄ³¸ö·ÖÖ§ (Î´±»ºÏ²¢µÄ·ÖÖ§±»É¾³ıµÄÊ±ºòĞèÒªÇ¿ÖÆ)
 
 
 
