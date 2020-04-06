@@ -22,6 +22,9 @@ git config --global user.email "你的邮箱"
 	HostName github.com
 	IdentityFile your dirs/.ssh/id_rsa_github ＃id_rsa_githubid_rsa_github文件的绝对路径
 	User pananfly
+	
+git config --global user.name "pananfly"
+git config --global user.email "你的邮箱"
 3.1与3.2操作	
 3.3同样的操作验证账号
 ------
