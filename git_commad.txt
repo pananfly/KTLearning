@@ -3,7 +3,7 @@
 2.在将要上传的本地项目目录运行:git init
 
 ----以下配置过的略过---
-3.本地创建ssh key:ssh-keygen -t rsa -C "自己的邮箱"
+3.本地创建ssh key:ssh-keygen -t rsa -C "你的邮箱"
 
 3.1创建好后找到id_rsa.pub打开并复制里面的内容
 3.2在github网站的Setting种添加SSH Key,title随便写，key粘贴刚才id_rsa.pub文件里的内容
@@ -20,12 +20,12 @@ git config --global user.email "你的邮箱"
 #github
 	Host github.com
 	HostName github.com
-	IdentityFile your dirs/.ssh/id_rsa_github ＃id_rsa_githubid_rsa_github文件的绝对路径
+	IdentityFile your dirs/.ssh/id_rsa_github ＃id_rsa_github文件的绝对路径
 	User pananfly
 	
 git config --global user.name "pananfly"
 git config --global user.email "你的邮箱"
-3.1与3.2操作	
+3.1找到id_rsa_github.pub打开并复制里面的内容与3.2操作	
 3.3同样的操作验证账号
 ------
 
