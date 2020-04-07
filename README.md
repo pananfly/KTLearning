@@ -1,2 +1,2 @@
 # KTLearning
-Kotling learning codes
+Kotlin learning codes
