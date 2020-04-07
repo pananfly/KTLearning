@@ -1,6 +1,8 @@
 package com.pananfly.learning.kt.ktlearngrammer
 
 import org.junit.Test
+import java.io.File
+import java.lang.IllegalStateException
 
 class BaseGrammerUnitTest {
 
@@ -153,9 +155,14 @@ class BaseGrammerUnitTest {
             println(item)
         }
         println("==========1==========")
+        //符合后就不再运行后面的
         when {
             "189fmg" in items -> println("Success!")
             "fjdsaj" !in items -> println("fjdsaj can not found.")
+        }
+        when {
+            2 == 1 -> println("=＝＝＝＝＝＝")
+            1 == 1 -> println("HHHHHHHHHHHH")
         }
         println("==========2==========")
         items.filter { it.startsWith("1") }
@@ -164,5 +171,106 @@ class BaseGrammerUnitTest {
             .forEach { println(it) }
 
         //Page 84
+    }
+
+    abstract class Shape(val sides: List<Double>) {
+        val perimeter: Double get() = sides.sum()
+        abstract fun calculateArea(): Double
+    }
+
+    interface RectangleProperties {
+        val isSquare: Boolean
+    }
+
+    class Rectangle(var width: Double , var height: Double)
+        :Shape(listOf(width , height , width , height)) , RectangleProperties {
+        override val isSquare: Boolean get() = width == height
+        override fun calculateArea(): Double =width * height
+    }
+
+    class Triangle(var sideA: Double , var sideB: Double , var sideC: Double)
+        :Shape(listOf(sideA , sideB , sideC)) {
+        override fun calculateArea(): Double {
+            val s = perimeter / 2
+            return Math.sqrt(s * (s - sideA)* (s - sideB)* (s - sideC))
+        }
+    }
+
+    @Test
+    fun test_class_simple() {
+        val rectangle = Rectangle(5.0 , 2.0)
+        val triangle = Triangle(3.0 , 4.0 , 5.0)
+        println("Area of rectangle is ${rectangle.calculateArea()}, it's perimeter is ${rectangle.perimeter}")
+        println("Area of triangle is ${triangle.calculateArea()}, it's perimeter is ${triangle.perimeter}")
+        //page 85
+    }
+
+    @Test
+    fun test_map() {
+        val map = mapOf<String, Int>("a" to 1 , "b" to 2 , "c" to 3)
+        for((k , v) in map) {
+            println("K: $k -> V: $v")
+        }
+        println("=====1====")
+        println("${map["a"]}")//不可以是${map['a']}，key类型不匹配
+        var map2 = mutableMapOf<Int , String>(1 to "fsdfl")
+        map2[4] = "sffsa"
+        println("=====2====")
+        println(map2[0])//not exist is null
+        println(map2[1])
+        println(map2[2])
+        println(map2[4])
+    }
+
+    fun String.expendFunc(): Int ? {
+        return length;
+        //return this.length; //The two are same
+    }
+
+    @Test
+    fun test_expend_func() {
+        val str = "121"
+        println(str.expendFunc())
+    }
+
+    object Resource {
+        const val name = "Single instance resource"
+        var id = 0;
+    }
+
+    @Test
+    fun test_single_obj() {
+        println(Resource.name)
+        Resource.id = 100
+        println(Resource.id)
+    }
+
+    @Test
+    fun test_if_not_null() {
+        val files = File("Test").listFiles()
+        println(files?.size)
+    }
+
+    @Test
+    fun test_if_not_null_else() {
+        val files = File("Test").listFiles()
+        println(files?.size ?: "empty")
+    }
+
+    @Test
+    fun test_if_null() {
+        val emails = mapOf<String , String>("email" to "111@mail.com" , "email2" to "222@mail.com")
+        val email = emails["email"] ?: throw IllegalStateException("email unexist")
+        println(email)
+        val email2 = emails["email3"] ?: "Can not found email3"
+        println(email2)
+        println("====1=====")
+        val emails2 = listOf<String>("2sfas" , "5345325")
+        val firstEmail = emails2.firstOrNull() ?: ""
+        println("first email: $firstEmail")
+        val emails3 = listOf<String>()
+        val firstEmail2 = emails3.firstOrNull() ?: "list is empty"
+        println("first email2: $firstEmail2")
+        //page 88
     }
 }
