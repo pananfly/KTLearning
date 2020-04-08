@@ -149,6 +149,10 @@ class BaseGrammerUnitTest {
         for (x in 9 downTo 0 step 3) {//下降-步进3，步进可不设
             println(x)
         }
+        println("=====4======")
+        for (x in 0 until 5 step 2) {//
+            println(x)
+        }
     }
 
     @Test
@@ -398,6 +402,11 @@ class BaseGrammerUnitTest {
     fun test_todo() {
         calcTaxes()
         //page 92
+    }
+
+    @Test
+    fun `fjldsjlf fjlsdjfla`() {
+        println("can't believe!")
     }
 
  }
