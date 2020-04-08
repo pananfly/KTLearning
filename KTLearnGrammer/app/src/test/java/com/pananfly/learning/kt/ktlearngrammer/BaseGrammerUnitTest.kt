@@ -3,6 +3,9 @@ package com.pananfly.learning.kt.ktlearngrammer
 import org.junit.Test
 import java.io.File
 import java.lang.IllegalStateException
+import java.math.BigDecimal
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class BaseGrammerUnitTest {
 
@@ -197,6 +200,17 @@ class BaseGrammerUnitTest {
     }
 
     @Test
+    fun test_apply_set_properties() {
+        val rectangle = Rectangle(1.0 , 1.0)
+            .apply {
+                width = 4.0
+                height = 5.0
+            }
+        //apply has change properties  value, but the shape parent has been set by init
+        println("Area of rectangle is ${rectangle.calculateArea()}, it's perimeter is ${rectangle.perimeter}")
+    }
+
+    @Test
     fun test_class_simple() {
         val rectangle = Rectangle(5.0 , 2.0)
         val triangle = Triangle(3.0 , 4.0 , 5.0)
@@ -249,6 +263,28 @@ class BaseGrammerUnitTest {
     fun test_if_not_null() {
         val files = File("Test").listFiles()
         println(files?.size)
+
+        println("=========1========")
+
+        //变量为null则不执行语句代码
+        files?.let {
+            println("files is not null")
+        }
+
+        val arr = listOf<Int>()
+        arr?.let {
+            println("arr is not null")
+        }
+
+        println("=========2========")
+        val arr2 = null
+        val arr3 = listOf<Int>( 1)
+        val arrDefault = listOf<Int>( 1 , 2 , 1)
+        //不空则运行花括号里面的，否则返回后面的
+        val mapped = arr2?.let { it } ?: arrDefault
+        println("map size: ${mapped?.size}")
+        val mapped2 = arr3?.let { it } ?: arrDefault
+        println("map size: ${mapped2?.size}")
     }
 
     @Test
@@ -273,4 +309,95 @@ class BaseGrammerUnitTest {
         println("first email2: $firstEmail2")
         //page 88
     }
-}
+
+    @Test
+    fun test_try_catch() {
+        val result = try {
+            listOf<String>("1" , "2")
+        } catch (e: IllegalStateException) {
+            throw IllegalStateException(e)
+        }
+        println(result?.size)
+    }
+
+    @Test
+    fun test_if_else_if() {
+        val a = 6
+        val result = if (a == 1) {
+            "1"
+        } else if (a == 2) {
+            "2"
+        } else {
+            "nothing"
+        }
+        println(result)
+    }
+
+    fun arrayOfMinusOnes(size: Int): IntArray {
+        return IntArray(size).apply { fill(-1) }
+    }
+
+    @Test
+    fun test_arrayOfMinusOnes() {
+        val arr = arrayOfMinusOnes(5);
+        arr.map { x -> x + 1 }.forEach { println(it) }
+    }
+
+    class Turtle {
+        fun penDown() { println("Pen down")}
+        fun penUp() { println("Pen up")}
+        fun turn(degrees: Double) { println("Pen turn $degrees")}
+        fun forward(pixels: Double) { println("Pen forward $pixels")}
+    }
+
+    @Test
+    fun test_with_run_funcs() {
+        val turtle = Turtle()
+        with(turtle) {
+            penDown()
+            for(i in 1..4) {
+                forward(100.0)
+                turn(90.0)
+            }
+            penUp()
+        }
+    }
+
+
+    @Test
+    fun test_try_with_sources() {
+        val stream = Files.newInputStream(Paths.get("D:\\DTLFolder\\pananfly.txt"))
+        stream.buffered().reader().use {
+            reader -> println(reader.readText())
+        }
+    }
+
+    @Test
+    fun test_bool_may_null() {
+        val b: Boolean? = null
+        if(b == true) {
+            println("true")
+        } else {
+            //false or null
+            println("false or unknow")
+        }
+    }
+
+    @Test
+    fun test_swap_variable() {
+        var a = 1
+        var b = 2
+        //谁调用apply或者also返回的是调用者本身，不管后面运行了什么
+        a = b.also { b = a }
+        println("a=$a, b=$b")
+    }
+
+    private fun calcTaxes(): BigDecimal = TODO("Tomorrow's word")
+
+    @Test
+    fun test_todo() {
+        calcTaxes()
+        //page 92
+    }
+
+ }
