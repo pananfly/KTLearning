@@ -73,4 +73,81 @@ class BaseTypeUnitTest {
 
         // page 116
     }
+
+    @Test
+    fun testNumberDivide() {
+        var x = 5 / 2.toDouble()
+        println(x)
+        var y = 5 / 2
+        println(y)
+        var z = 5L / 2
+        println(z)
+    }
+
+    @Test
+    fun testBitsCalc() {
+        //位运算只适用于Int Long
+        //左移
+        val x = (1 shl 2)
+        println(x)
+        //左移再位与
+        val x1 = (1 shl 2) and 0x000FF000
+        println(x1)
+        //右移
+        val y = 4 shr 1
+        println(y)
+        //无符号右移
+        val z = -4 ushr 8
+        println(z)
+        //位或
+        val zof = 4 or 4
+        println(zof)
+        //位异或
+        val zxor = 3 xor 4
+        println(zxor)
+        //位非= positive: -x - 1 ,negative: -x + 1
+        val zinv = 10.inv()
+        println(zinv)
+    }
+
+    private fun testCharToInt(c: Char): Int? {
+        if(c in  '0'..'9') {
+            return c.toInt() - '0'.toInt()
+        }
+        return null;
+    }
+
+    @Test
+    fun testChar() {
+        val c = '1'
+        if(c == '2') {}
+        println(testCharToInt(c))
+        println(testCharToInt('a'))
+    }
+
+    @Test
+    fun testArray() {
+        //page 119
+        val asc = Array(5) {i -> i * i}
+        asc.forEach { println(it) }
+
+        println("======1=======")
+        //无装箱开箱的数组 　ByteArray ShortArray IntArray等 与Array不是继承关系，但有相同的方法和属性
+        val x: IntArray = intArrayOf(1 , 2, 3)
+        x[0] = x[1] + x[2]
+        x.forEach { println(it) }
+        println("======2=======")
+        //初始化为0
+        var arr1 = IntArray(5)
+        arr1.forEach { println(it) }
+        println("======3=======")
+        //初始化为42
+        var arr2 = IntArray(5){42}
+        arr2.forEach { println(it) }
+        println("======4=======")
+        //初始化为
+        var arr3 = IntArray(5){it}
+        arr3.forEach { println(it) }
+        // page 120
+    }
 }
