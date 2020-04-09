@@ -1,6 +1,7 @@
 package com.pananfly.learning.kt.ktlearngrammer
 
 import org.junit.Test
+import java.io.File
 
 class BaseTypeUnitTest {
 
@@ -35,5 +36,41 @@ class BaseTypeUnitTest {
 //        testTypePrintDouble(eFloat) // 类型不匹配
 
         // page 114
+
+        // 不支持八进制
+        val a = 123 // 十进制
+        val b = 0x0F // 十六进制
+        val c = 0b0010101 // 二进制
+        val double1 = 123.5
+        val double2 = 123.5e10
+        val float1 = 123.5f
+        val float2 = 123.5F
+
+        // 数字下划线增加可读性
+        val oneMillion = 1_000_000
+        val creditCardNum = 1234_5678_9012_3456L
+        val socialSecurityNumber = 999_99_9999L
+        val hexBytes = 0xFF_EC_DE_5E
+        val bytes = 0b11010101_01100010
+
+        val boxReal: Int? = 100
+        println("box compared ${a === a}")
+        // 重新装箱-不一定保留同一性，保留相等性
+        val boxSecond: Int? = boxReal
+        val boxThird: Int? = boxReal
+        println("box after compared ${boxSecond === boxThird}")
+        println("box after compared value ${boxSecond == boxThird}")
+
+
+        println("=========1==========")
+        val justInt: Int? = 1000000000
+        // 不被支持 小类型不能直接赋值给大类型
+//        val justLong: Long? = justInt
+//        println(justInt == justLong)
+        // 可以使用显式转换
+        val justLong2: Long? = justInt?.toLong()
+        println("justLong2: $justLong2")
+
+        // page 116
     }
 }
