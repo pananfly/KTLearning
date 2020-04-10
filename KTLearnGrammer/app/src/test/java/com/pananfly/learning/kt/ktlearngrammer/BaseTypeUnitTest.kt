@@ -150,4 +150,241 @@ class BaseTypeUnitTest {
         arr3.forEach { println(it) }
         // page 120
     }
+
+    @Test
+    fun testUnSignNumber() {
+        val b: UByte = 1u // UByte
+        val s: UShort = 1U // UShort
+        val l: ULong = 1u // ULong
+
+        val a1 = 42u // UInt
+        val a2 = 0xFFFF_FFFF_FFFFu // ULong:未提供预期类型，不适用于UInt
+    }
+
+    @Test
+    fun testString() {
+        val str = "abcd"
+        for(c in str) {
+            println(c)
+        }
+        println("=====1========")
+        val s = "abc" + "efg" + 1
+        println(s)
+        println("=====2========")
+        // 文档说$符号不支持转义，试了为啥又是可以???
+        val s2 = "abc\$\n123"
+        println(s2)
+        println("=====3========")
+        val text = """
+            for (c in "foo")
+                println(c)
+        """
+        println(text)
+        println("=====4========")
+        //只清除前后空格，并不能对齐到0位置
+        val text2 = """
+            for (c in "foo")
+                println(c)
+        """.trimMargin()
+        println(text2)
+        println("=====5========")
+        // 对齐到0
+        val text3 = """
+            for (c in "foo")
+                println(c)
+        """.trimIndent()
+        println(text3)
+        println("=====6========")
+        // 不支持转义的类似$符号，可以使用如下方式
+        val price = """
+            ${'$'}9.99
+        """.trimIndent()
+        println("$price is cheap")
+    }
+
+    @Test
+    fun testIf() {
+        val a = 1
+        val b = 2
+        var max: Int
+        if (a > b) {
+            max = a
+        } else {
+            max = b
+        }
+
+        //表达式需要有else
+        val max2 = if (a > b) a else b
+        //最后的表达式代表返回的值
+        val max3 = if(a > b) {
+            println("a")
+            a
+            a + 1
+        } else {
+            println("b")
+            println("c")
+            b
+            b + 3
+        }
+        println(max3)
+    }
+
+    @Test
+    fun testWhen() {
+        val x = 1
+
+        when (x) {
+            1 -> println("x==1")
+            2 -> println("x==2")
+            else -> println("x not 1 or 2")
+        }
+        when (x) {
+            1 , 2 -> println("x==1 or x==2")
+            else -> println("x not 1 or 2")
+        }
+        println("=====1=====")
+        val y = when(x) {
+            1 , 2 -> {
+                println("x==1 or x==2")
+                x
+            }
+            else -> {
+                println("not match")
+                0
+            }
+        }
+        println(y)
+        println("=====2=====")
+        when(x) {
+            in 1..10 -> println("x is in 1 to 10.")
+            !in 10..20 -> println("x is not in 10 to 20.")
+            else -> println("not match.")
+        }
+        println("=====3=====")
+        fun iiii(x1: Any) = when(x1) {
+            is String -> x1.startsWith("p")
+            is Int -> x1 == 10
+            else -> false
+        }
+        val z = iiii("cvc")
+        println(z)
+        println("=====4=====")
+        fun executeRequest(): Int {
+            return 1
+        }
+        fun getValue() =
+            when(val response = executeRequest()) {
+                in 1..10 -> response + 1
+                else -> 0
+            }
+        println(getValue())
+
+    }
+
+    @Test
+    fun testArrayOfWithIndex() {
+        val array = arrayOf("a" , "b" , "c")
+        for(i in array.indices) {
+            println(array[i])
+        }
+        println("===1===")
+        for((index , value) in array.withIndex()) {
+            println("$index = $value")
+        }
+    }
+
+    private fun testBreakAndContinueLabelFoo() {
+        //return to call func
+        listOf(1 , 2 , 3 , 4 , 5).forEach {
+            if(it == 3) return
+            println(it)
+        }
+        println("Un reach end.")
+    }
+
+    private fun testBreakAndContinueLabelFoo2() {
+        //return to forEach
+        listOf(1 , 2 , 3 , 4 , 5).forEach lit@{
+            if(it == 3) return@lit
+            println(it)
+        }
+        println("reach end.")
+    }
+
+    private fun testBreakAndContinueLabelFoo3() {
+        //return to forEach
+        listOf(1 , 2 , 3 , 4 , 5).forEach {
+            if(it == 3) return@forEach
+            println(it)
+        }
+        println("reach end.")
+    }
+
+    private fun testBreakAndContinueLabelFoo4() {
+        //return to forEach 匿名内部类
+        listOf(1 , 2 , 3 , 4 , 5).forEach(fun(value: Int) {
+            if(value == 3) return
+            println(value)
+        })
+        println("reach end.")
+    }
+
+    private fun testBreakAndContinueLabelFoo5() {
+        //return to loop
+        run loop@{
+            listOf(1 , 2 , 3 , 4 , 5).forEach {
+                if (it == 3) return@loop
+                println(it)
+            }
+        }
+        println("reach end.")
+    }
+
+    private fun testBreakAndContinueLabelFoo6() {
+        //return to loop 返回return 后的值
+        val xx = run loop@{
+            listOf(1 , 2 , 3 , 4 , 5).forEach {
+                if (it == 6) return@loop it
+                println(it)
+            }
+            return@loop 0
+        }
+        println("reach end xx:$xx.")
+    }
+
+    @Test
+    fun testBreakAndContinueLabel() {
+        // loop 等标签名称只要是有效写法的就可以
+        loop@ for (i in 1..5) {
+            for (j in 1..3) {
+                println("i:$i -> j:$j")
+                if(i == 2 && j == 2) {
+                    break@loop
+                }
+            }
+        }
+        println("====1=====")
+        loop@ for (i in 1..5) {
+            for (j in 1..3) {
+                println("i:$i -> j:$j")
+                if(i == 2 && j == 2) {
+                    continue@loop
+                }
+            }
+        }
+        println("====2=====")
+        testBreakAndContinueLabelFoo()
+        println("====3=====")
+        testBreakAndContinueLabelFoo2()
+        println("====4=====")
+        testBreakAndContinueLabelFoo3()
+        println("====5=====")
+        testBreakAndContinueLabelFoo4()
+        println("====6=====")
+        testBreakAndContinueLabelFoo5()
+        println("====7=====")
+        testBreakAndContinueLabelFoo6()
+
+        // page 135
+    }
 }
