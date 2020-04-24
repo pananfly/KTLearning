@@ -6,6 +6,7 @@ import java.lang.IllegalStateException
 import java.math.BigDecimal
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 
 class BaseGrammerUnitTest {
 
@@ -125,7 +126,7 @@ class BaseGrammerUnitTest {
         val x = 1
         val y = 9
         //包含头和尾----> 1 =< x <= y+1
-        if(x in 1 .. y+1) {
+        if(x in 1..y+1) {
             println("Fit in range.")
         } else {
             println("Not in range.")
@@ -190,13 +191,13 @@ class BaseGrammerUnitTest {
     }
 
     class Rectangle(var width: Double , var height: Double)
-        :Shape(listOf(width , height , width , height)) , RectangleProperties {
+        : Shape(listOf(width , height , width , height)) , RectangleProperties {
         override val isSquare: Boolean get() = width == height
         override fun calculateArea(): Double =width * height
     }
 
     class Triangle(var sideA: Double , var sideB: Double , var sideC: Double)
-        :Shape(listOf(sideA , sideB , sideC)) {
+        : Shape(listOf(sideA , sideB , sideC)) {
         override fun calculateArea(): Double {
             val s = perimeter / 2
             return Math.sqrt(s * (s - sideA)* (s - sideB)* (s - sideC))
@@ -237,7 +238,8 @@ class BaseGrammerUnitTest {
         println(map2[0])//not exist is null
         println(map2[1])
         println(map2[2])
-        println(map2[4])
+        println(map2[3])
+        println(map2[4])//
     }
 
     fun String.expendFunc(): Int ? {
@@ -253,7 +255,7 @@ class BaseGrammerUnitTest {
 
     object Resource {
         const val name = "Single instance resource"
-        var id = 0;
+        var id = 0
     }
 
     @Test

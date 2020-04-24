@@ -145,7 +145,7 @@ class BaseTypeUnitTest {
         var arr2 = IntArray(5){42}
         arr2.forEach { println(it) }
         println("======4=======")
-        //初始化为
+        //初始化为0-4
         var arr3 = IntArray(5){it}
         arr3.forEach { println(it) }
         // page 120
