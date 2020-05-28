@@ -249,8 +249,10 @@ class BaseClassUnitTest {
             }
 
             fun drawAndFill() {
+                draw()
                 //调用外部类的方法和成员变量
                 super@ClassSuperImpl1.draw()
+                super<ClassSuperBase>@ClassSuperImpl1.swipe()
                 fill()
                 println("Filler draw and fill with color ${super@ClassSuperImpl1.color}")
             }

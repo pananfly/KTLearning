@@ -177,4 +177,40 @@ class BaseObjectUnitTest {
         // Host("1111").printConnectInformation()
         // page 162
     }
+
+    open class ExtendOpen
+
+    class ExtendOpenDerived: ExtendOpen()
+
+    open class ExtendOpenCaller {
+        open fun ExtendOpen.printInfo() {
+            println("ExtendOpen info")
+        }
+
+        open fun ExtendOpenDerived.printInfo() {
+            println("ExtendOpenDerived info")
+        }
+
+        fun call(o: ExtendOpen) {
+            o.printInfo()
+        }
+    }
+
+    class ExtendOpenDerivedCaller : ExtendOpenCaller() {
+        override fun ExtendOpen.printInfo() {
+            println("ExtendOpen override info")
+        }
+
+        override fun ExtendOpenDerived.printInfo() {
+            println("ExtendOpenDerived override info")
+        }
+    }
+
+    @Test
+    fun testExtendVisible3() {
+        ExtendOpenCaller().call(ExtendOpen()) // ExtendOpen info
+        ExtendOpenDerivedCaller().call(ExtendOpen()) // ExtendOpen override info-分发接收者虚拟解析
+        ExtendOpenDerivedCaller().call(ExtendOpenDerived()) // ExtendOpen override info-扩展接收者静态解析
+
+    }
 }
