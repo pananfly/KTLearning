@@ -213,4 +213,49 @@ class BaseObjectUnitTest {
         ExtendOpenDerivedCaller().call(ExtendOpenDerived()) // ExtendOpen override info-扩展接收者静态解析
 
     }
+
+    data class TestDataClass(var i: Int) {
+        var str: String = ""
+        constructor(i: Int, j: String) : this(i) {
+            str = j
+        }
+    }
+
+    data class TestDataClass2(var i: Int = 0, var str: String = "") {
+    }
+
+    @Test
+    fun testDataClass1() {
+        val d1: TestDataClass = TestDataClass(1, "123456")
+        println(d1.toString()) // toString只会打印主函数中定义的i
+        val d2: TestDataClass2 = TestDataClass2() // 无参构造函数
+        println(d2.toString()) // toString只会打印主函数中定义的i
+        //在数据类中toString() equals() hashCode() copy() 等函数只对主构造函数的属性进行操作，其他将被忽略
+        val d11: TestDataClass = TestDataClass(1, "45435646")
+        println(d1.equals(d11)) // 将会打印true，因为这里只比较了i，对str将进行忽略，所以对忽略的属性可放在类中定义
+        val d12 = d11.copy() // 单纯拷贝
+        val d13 = d11.copy(12) // 拷贝时修改某一或所有主构造函数定义的属性
+        println("============")
+        val d21: TestDataClass2 = TestDataClass2(123, "123456")
+        val (age, name) = d21 // 数据类的解构
+        println("age: $age, name: $name")
+    }
+
+    sealed class ExprSealed // 构造函数只能是private
+    // un support, why the document writes this
+//    data class ConstSealed(val number: Int) : ExprSealed() {
+//
+//    }
+//    object ObjSealed : ExprSealed()
+
+    class BoxGeneric<T>(t: T) {
+        var value = t
+    }
+
+    fun testGeneric() {
+        val bb : BoxGeneric<Int> = BoxGeneric(1) // 指定类型
+        val bc = BoxGeneric(1) // 自动推导
+        // page 168
+    }
+
 }
