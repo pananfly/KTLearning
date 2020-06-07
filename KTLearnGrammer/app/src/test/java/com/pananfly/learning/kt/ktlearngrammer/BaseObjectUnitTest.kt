@@ -249,13 +249,61 @@ class BaseObjectUnitTest {
 //    object ObjSealed : ExprSealed()
 
     class BoxGeneric<T>(t: T) {
-        var value = t
+        var value: T = t
     }
 
     fun testGeneric() {
         val bb : BoxGeneric<Int> = BoxGeneric(1) // 指定类型
         val bc = BoxGeneric(1) // 自动推导
         // page 168
+    }
+
+    fun covariantCopy(from: Array<out Any>, to: Array<Any>) {
+        if(from.isEmpty() || to.isEmpty()) {
+            return
+        }
+        to[0] = from[0]
+        // from 定义了生产者out，不能对其进行赋值
+        // from[1] = to[1]
+    }
+
+    fun covariantCopy2(from: Array<out  Any>, to: Array<in Any>) {
+        if(from.isEmpty() || to.isEmpty()) {
+            return
+        }
+        to[0] = from[0]
+        // from 定义了生产者out，不能对其进行赋值, 只能调用get
+        // from[1] = to[1]
+        // from.set(0, 1)
+        val t = to[0]
+    }
+
+    @Test
+    fun testCovariantCopy() {
+        val ints: Array<Int> = arrayOf(1, 2, 3)
+        val any = Array<Any>(3) { "" }
+        covariantCopy2(ints, any)
+    }
+
+    // 上界，只有Comparable<T>的子类型可以代替T
+    fun <T : Comparable<T>> sortSomething(list: List<T>) {
+
+    }
+    // 多个上界
+    fun <T> sortSomething2(list: List<T>)
+        where T : CharSequence,
+              T : Comparable<T>{
+
+    }
+
+    @Test
+    fun testUpperExtend() {
+        sortSomething(listOf<Int>(1))
+        // sortSomething(listOf(HashMap<Int, String>(1)))  // 错误:HashMap<Int, String> 不是 Comparable<HashM ap<Int, String>> 的子类型
+        // sortSomething2(listOf<Int>(1)) // 不满足CharSequence界定
+        sortSomething2(listOf<String>("123"))
+
+        // page 174
     }
 
 }
