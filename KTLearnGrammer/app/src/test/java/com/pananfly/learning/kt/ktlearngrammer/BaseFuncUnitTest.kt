@@ -1,6 +1,8 @@
 package com.pananfly.learning.kt.ktlearngrammer
 
 import org.junit.Test
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.math.abs
 import kotlin.math.cos
 
@@ -77,5 +79,74 @@ class BaseFuncUnitTest {
         val result = runTrans(repeatFun)
         println("result = $result")
         // page 214
+
+        println("=====0=====")
+        //invoke
+        val stringPlus: (String, String) -> String = String::plus
+        val stringPlus2: String.(String) -> String = String::plus
+        val intPlus: Int.(Int)-> Int = Int::plus
+        println(stringPlus.invoke("<-", "->"))
+        println(stringPlus("<=", "=>")) // 二者等同
+        println("panan".stringPlus2("fly")) // stringPlus2的定义方式三种用法都可以
+        println(intPlus.invoke(1, 2))
+        println(intPlus(1, 3))
+        println(2.intPlus(4))
     }
+
+    class HTML1 {
+        fun body() {
+            println("Body.")
+        }
+    }
+
+    fun html(init: HTML1.() -> Unit): HTML1 {
+        val html = HTML1()
+        html.init() // 调用lambda
+        return html
+    }
+
+    @Test
+    fun testHtml() {
+        val h: HTML1 = html { body() }
+    }
+
+    // 内联函数使用lambda
+    inline fun <T> lock(lock: Lock, body: () -> T): T {
+        lock.lock()
+        val t: T =  body()
+        lock.unlock()
+        return t
+    }
+
+    fun lockFunc(): Int {
+        return 1
+    }
+
+    // 禁用内联lambda
+    inline fun noInlineLambda(inlined: () -> Unit, noinline notInlined: () -> Unit) {
+
+    }
+
+    // reified 修饰符来限定类型参数,现在可以在函数内部访问它了, 几乎就像是一个 普通的类一样。由于函数是内联的,不需要反射,正常的操作符如 !is 和 as 现在都能用 了。
+//    inline fun <reified T> TreeNode.findParentOfType(): T? {
+//        var p = parent
+//        while (p != null && p !is T) {
+//            p = p.parent
+//        }
+//        return p as T?
+//    }
+
+    inline fun <reified  T> membersOf() = T::class.members
+
+    @Test
+    fun testLock() {
+        val l: Lock = ReentrantLock()
+        val value = lock(l) {lockFunc()}
+        println(value)
+        println("====0=====")
+        println(membersOf<StringBuilder>().joinToString("\n"))
+
+        // page 223
+    }
+
 }
