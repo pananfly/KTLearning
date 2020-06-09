@@ -116,4 +116,105 @@ class BaseCollectionUnitTest {
         println(num2.mapIndexed { index, value -> index * value })
         // page 234
     }
+
+    @Test
+    fun testIterator() {
+        val nums = listOf<Int>(1, 2, 3)
+        val numsIterator = nums.iterator()
+        while (numsIterator.hasNext()) {
+            print("${numsIterator.next()} ")
+        }
+        println()
+        for (item in nums) {
+            print("$item ")
+        }
+        println()
+        nums.forEach {
+            print("$it ")
+        }
+        println()
+
+        println("====0=====")
+        //ListIterator 可以正向和反响迭代
+        val numsListIterator = nums.listIterator()
+        while (numsListIterator.hasNext()) {
+            println("${numsListIterator.nextIndex()}: ${numsListIterator.next()}")
+        }
+        println("====1=====")
+        while (numsListIterator.hasPrevious()) {
+            println("${numsListIterator.previousIndex()}: ${numsListIterator.previous()}")
+        }
+        println("====1=====")
+        val mNums = mutableListOf<Int>(1, 2, 3, 4, 5)
+        val mIterator = mNums.iterator()
+        if(mIterator.hasNext()) {
+            mIterator.next()
+            mIterator.remove()
+        }
+        if(mIterator.hasNext()) {
+            mIterator.next()
+            mIterator.remove()
+        }
+        mNums.forEach{print("$it ")}
+        println()
+        println("====2=====")
+        val mListIterator = mNums.listIterator()
+        if (mListIterator.hasNext()) {
+            mListIterator.next()
+        }
+        mListIterator.add(123) // add value
+        if (mListIterator.hasNext()) {
+            mListIterator.next()
+            mListIterator.set(666) // set current index's value
+        }
+        mNums.forEach{print("$it ")}
+        println()
+    }
+
+    class Version(val major: Int, val minor: Int) : Comparable<Version> {
+        override fun compareTo(other: Version): Int {
+            if(this.major != other.major) {
+                return this.major - other.major
+            }
+            return this.minor - other.minor
+        }
+    }
+
+    @Test
+    fun testRange() {
+        val x = 1
+        if(x in 1..4) {
+            println("x=$x in 1 to 4 range")
+        }
+        println("====0=====")
+        for (i in 1..4) {
+            print("$i ")
+        }
+        println()
+        println("====1=====")
+        for (i in 4 downTo 1) {
+            print("$i ")
+        }
+        println()
+        println("====2=====")
+        for (i in 1..4 step  2) {
+            print("$i ")
+        }
+        println()
+        println("====3=====")
+        for (i in 4 downTo 1 step  2) {
+            print("$i ")
+        }
+        println()
+        println("====4=====")
+        for (i in 1 until 4) { // 不包含4
+            print("$i ")
+        }
+        println()
+        println("====5=====")
+        val versionRange = Version(1, 11)..Version(1, 30) // 创建区间使用 ..
+        println(Version(0, 9) in  versionRange) // false
+        println(Version(1, 20) in  versionRange) // true
+        // page 239
+    }
 }
