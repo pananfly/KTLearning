@@ -217,4 +217,30 @@ class BaseCollectionUnitTest {
         println(Version(1, 20) in  versionRange) // true
         // page 239
     }
+
+    @Test
+    fun testSequence() {
+        val numberSequence = sequenceOf(1, 2, 3, 4) // 直接创建
+        val nums = listOf<Int>(1, 2)
+        val numberSequence2 = nums.asSequence() // 从Iterable创建
+        val oddNumbers = generateSequence(1) { it + 2} // 函数创建，此序列是无限的，it是上一个元素的值，所以lambda表达式的操作只对第二个及之后的元素有作用
+        println(oddNumbers.take(5).toList())
+        val oddNumbers2 = generateSequence(1){ if(it < 10) it + 2 else null } // 最后返回null则会创建一个有效的序列
+        println("size: ${oddNumbers2.count()} -> ${oddNumbers2.toList()}")
+        val blockSequences = sequence {
+            yield(1)
+            yieldAll(listOf(3, 5))
+            yieldAll(generateSequence (7){ it + 2 }) // 这里是无限的元素，之后再写其他的yield是无效的
+        }
+        println(blockSequences.take(10).toList())
+    }
+
+    @Test
+    fun testHandleCollection2() {
+        val numbers = listOf<String>("one", "two", "three", "four")
+        val filterNumbers = numbers.filter { it.length > 3 } // 此操作不会对numbers本身有影响, 过滤结果赋值给了filterNumbers
+        println("Numbers are still $numbers")
+        println("filterNumbers are $filterNumbers")
+        // page 247
+    }
 }
