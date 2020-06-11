@@ -235,6 +235,16 @@ class BaseCollectionUnitTest {
         println(blockSequences.take(10).toList())
     }
 
+    data class FullName (val firstName: String, val lastName: String)
+    fun parseFullName(fullName: String?): FullName {
+        val params = fullName?.split(" ")
+        return if(params?.size == 2) {
+            FullName(params[0], params[1])
+        } else {
+            FullName(fullName.toString(), fullName.toString())
+        }
+    }
+
     @Test
     fun testHandleCollection2() {
         val numbers = listOf<String>("one", "two", "three", "four")
@@ -242,5 +252,95 @@ class BaseCollectionUnitTest {
         println("Numbers are still $numbers")
         println("filterNumbers are $filterNumbers")
         // page 247
+
+        val result = numbers.mapTo(HashSet()) {it.length}
+        println(result)
+        println("====0======")
+        val numbers2 = mutableListOf<String>("one", "two", "three", "four")
+        val sortNumbers = numbers2.sorted()
+        println(sortNumbers)
+        println(numbers2 == sortNumbers) // false
+        println("====1======")
+        numbers2.sort()
+        println(numbers2)
+        println(numbers2 == sortNumbers) // true
+        println("====2======")
+        val numbers3 = listOf<Int>(1, 2, 3)
+        println(numbers3.map { it * 3 }) // 不会对numbers3有影响
+        println(numbers3)
+        println(numbers3.mapIndexed { index, value -> index * value })
+        println(numbers3.mapNotNull { if (it == 2) null else it * 3 })
+        println(numbers3.mapIndexedNotNull { index, i -> if(index == 0) null else index * i })
+        println("====3======")
+        val numbersMap = mapOf<String, Int>("Key1" to 1, "Key2" to 2, "Key3" to 3, "Key11" to 11)
+        println(numbersMap.mapKeys { it.key.toUpperCase() }) // 对key做转换
+        println(numbersMap.mapValues { it.value + it.key.length }) // 对值做转换
+        println("====4======")
+        val colors = listOf<String>("Red", "brown", "grey")
+        val animals = listOf<String>("fox", "brear", "wolf")
+        println(colors zip animals) // 返回pair对象的列表 [(Red, fox), (brown, brear), (grey, wolf)]
+        val lessAnimals = listOf<String>("fox", "brear")
+        println(colors.zip(lessAnimals)) // 根据较少的返回，较长的部分忽略 [(Red, fox), (brown, brear)]
+        println(colors.zip(animals) {color, animal -> "The ${animal.capitalize()} is $color"}) // 返回List<T>
+        println("====5======")
+        val numberPairs = listOf("one" to 1, "two" to 2, "three" to 3, "four" to 4)
+        println(numberPairs.unzip()) // 返回Pair<List<T>, List<R>> 第一个List返回键, 第二个List返回值
+        println("====6======")
+        println(numbers.associateWith { it.length }) // 返回map<K, V>, 原始值是键, 转换函数中产生值
+        println(numbers.associateBy { it.first().toUpperCase() })// 返回map<K, V>, 原始值是值, 转换函数中产生键, 有相同键则只保留最后一个
+        println(numbers.associateBy(keySelector = {it.first().toUpperCase()}, valueTransform = {it.length}))// 返回map<K, V>, 自指定键值, 有相同键则只保留最后一个
+        val names = listOf("Alice Adams", "Brian Brown", "Clara Campbell")
+        println(names.associate { name -> parseFullName(name).let { it.lastName to it.firstName  } })// 返回Map<K, V>
+    }
+
+    @Test
+    fun testHandleCollection3() {
+        val numberSets = listOf(setOf(1, 2, 3), setOf(4, 5, 6), setOf(1, 2))
+        println(numberSets.flatten()) // 返回List<T> 返回所有元素的List集合
+        println(numberSets.flatMap { it.plus("100").minus(1)}) // 返回List<T>, 对每个set进行转换，在其后拼接100, 并减去集合中的1
+        println("======0======")
+        val numbers = listOf<String>("one", "two", "three", "four")
+        println(numbers.joinToString()) // 构建成单个String
+        println(numbers.joinToString {"Element: ${it.toUpperCase()}"}) // 构建成单个String
+        println(numbers.joinToString(separator = "---", prefix = "####", postfix = "=====")) // 构建成单个String, 自定义拼接、前缀、后缀字符
+        val strBuffer = StringBuffer("pananfly :")
+        numbers.joinTo(strBuffer) // numbers 拼接到strBuffer之后并赋值给strBuffer
+        println(strBuffer)
+        println(numbers)
+    }
+
+    @Test
+    fun testHandleCollection4() {
+        val numbers = listOf("one", "two", "three", "four")
+        println(numbers.filter { it.length > 3 })
+        println(numbers.filterIndexed { i, s -> i != 0 && s.length < 5 })
+        println(numbers.filterNot { it.length <= 3 }) // 取过滤结果为false的集合
+        val numbersMap = mapOf("key1" to 1, "key2" to 2, "key3" to 3, "key11" to 11)
+        println(numbersMap.filter { (k, v) -> k.endsWith("1") && v > 10 })
+        val numbers2 = listOf(null, 1, "two", 3.0, "four")
+        print("Filter String result: ")
+        numbers2.filterIsInstance<String>().forEach { print("$it ") } // 指定类型过滤
+        println()
+        val numbers3 = listOf(null, "123", "two", "four")
+        println(numbers3.filterNotNull()) // 过滤null
+
+        println("=====0======")
+        val (match, rest) = numbers.partition { it.length > 3 } // 返回Pair<List<T>, List<T>> 前者是符合条件的结果，后者是其他的
+        println(match)
+        println(rest)
+        println("=====1======")
+        val empty = emptyList<Int>()
+        println(numbers.any { it.endsWith("e") }) // true// 至少有一个元素匹配则返回true
+        println(numbers.any()) // true
+        println(empty.any()) // false
+        println("=====2======")
+        println(numbers.none { it.endsWith("a") }) // true // 没有一个元素匹配则返回true
+        println(numbers.none()) // false 有元素则为false
+        println(empty.none()) // true
+        println("=====3======")
+        println(numbers.all { it.endsWith("e") })  // false // 所有元素都匹配才返回true，否则false
+        println(empty.all { it > 5 }) // true // 在一个空集合上调用all都会返回true
+
+        // page 258
     }
 }
