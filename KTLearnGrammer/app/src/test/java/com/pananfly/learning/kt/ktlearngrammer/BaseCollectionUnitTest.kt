@@ -343,4 +343,126 @@ class BaseCollectionUnitTest {
 
         // page 258
     }
+
+    @Test
+    fun testHandleCollection5() {
+        val numbers = listOf<Int>(1, 2, 3, 4, 5, 2, 4, 6)
+        val plusNumbers = numbers + 55
+        println(plusNumbers)
+        // plus(+) 和 minus(-) 都是返回的只读集合
+        val minusNumbers = numbers - 2 // 当第二个操作数是一个元素的时候，只移除第一个操作数中符合的第一个元素
+        println(minusNumbers) // [1, 3, 4, 5, 2, 4, 6]
+        val minusNumbers2 = numbers - listOf<Int>(2) // 当第二个操作数是一个集合的时候，移除第一个操作数中所有符合的元素
+        println(minusNumbers2) // [1, 3, 4, 5, 4, 6]
+        println("========")
+        val mapNumbers = mapOf<Int, Int>(1 to 1, 2 to 2, 3 to 3, 4 to 4)
+        val plusMapNumbers = mapNumbers + (5 to 5)
+        println(plusMapNumbers)
+        val minusMapNumbers = mapNumbers - (1 to 1) // 操作无效
+        println(minusMapNumbers)
+        val minusMapNumbers2 = mapNumbers - mapOf<Int, Int>(1 to 1) // 操作无效
+        println(minusMapNumbers2)
+        println(mapNumbers)
+    }
+
+    @Test
+    fun testHandleCollection6() {
+        val numbers = listOf("one", "two", "three", "four", "five")
+        println(numbers.groupBy { it.first().toUpperCase() })// 返回的是map<k, List<T>>
+        println(numbers.groupBy(keySelector = {it.first()}, valueTransform = {it.toUpperCase()}))
+        println(numbers.groupingBy { it.first() }.eachCount()) // 计算每个分组的个数
+
+        println(numbers.groupingBy { it.first() }.fold(initialValueSelector = { _, _ -> kotlin.jvm.internal.Ref.IntRef() },
+            operation = { _, acc, _ -> acc.apply { element += 1 } })) // 计算每个分组的个数
+        val numbers2 = listOf<Any>("one", "two", "three", "four", "five", 1)
+        println(numbers2.groupingBy { it.toString().length }.fold(0, {t, k -> if(k !is String) t else k.length}))
+    }
+
+    @Test
+    fun testHandleCollection7() {
+        val numbers = listOf("one", "two", "three", "four", "five", "six")
+        println(numbers.slice(1..3)) // 返回List<T>, 取下标为1-3的元素
+        println(numbers.slice(0..4 step 2)) // 步长为2
+        println(numbers.slice(setOf(1, 5, 0)))
+//        println(numbers.slice(setOf(1, 5, 0, 15))) // 15 会报ArrayIndexOutOfBoundsException
+        println("=====0=====")
+        println(numbers.take(3)) // 从头开始获取3个数量的元素
+        println(numbers.takeLast(3)) // 从尾开始获取3个数量的元素，按照原来的顺序 [four, five, six]
+        println(numbers.take(10)) // 不会报越界
+        println(numbers.takeLast(10)) // 不会报越界
+        println(numbers.drop(1)) // 从头开始去掉1个元素
+        println(numbers.dropLast(2)) // 从尾部开始去掉2个元素
+        println(numbers.drop(10)) // 不会报越界 返回空集合
+        println(numbers.dropLast(10)) // 不会报越界 返回空集合
+        println("=====1=====")
+        // 下面这一段相当拗口
+        """
+            takeWhile() 是带有谓词的 take() ：它将不停获取元素直到排除与谓词匹配的首个元
+        素。如果首个集合元素与谓词匹配，则结果为空。
+            takeLastWhile() 与 takeLast() 类似：它从集合末尾获取与谓词匹配的元素区间。区间取集合的一部分
+        的首个元素是与谓词不匹配的最后一个元素右边的元素。如果最后一个集合元素与谓词匹配，则结果为空。
+            dropWhile() 与具有相同谓词的 takeWhile() 相反：它将首个与谓词不匹配的元素返回到末尾。
+            dropLastWhile() 与具有相同谓词的 takeLastWhile() 相反：它返回从开头到最后一个与谓词不匹配的元素。
+        """.trimIndent()
+        val numbers2 = listOf("one", "1", "two", "three", "four", "five", "six")
+        println(numbers2.takeWhile { it.length == 3 }) // 从集合首元素判断，第一个符合条件的则有值，第二个或之后有不符合条件的则停止判断
+        println(numbers2.takeWhile { it.length == 5 }) // 从集合首元素判断，第一个不符合条件则为空
+        println(numbers2.takeLastWhile { it.length == 3 }) // 只有最后一个元素符合条件才返回有值，否则为空
+        println(numbers2.takeLastWhile { it.length == 4 }) // 只有最后一个元素符合条件才返回有值，否则为空
+        println(numbers2.dropWhile { it.length == 3 }) // 根据条件去掉元素, 只有第一个符合条件才去掉，否则不处理后面的数据
+        println(numbers2.dropLastWhile { it.length == 4 }) // 根据条件去掉元素, 只有最后一个符合条件才去掉，否则不处理后面的数据
+
+    }
+
+    @Test
+    fun testHandleCollection8() {
+        val numbers = (0..13).toList()
+        println(numbers.chunked(3)) // 返回List<List<T>>
+        println(numbers.chunked(3) {it.sum()}) // 返回List<T>
+        println(numbers.chunked(15)) // 大于当前总数量，则内部list只有一个集合，不会为空
+        println("===0====")
+        println(numbers.windowed(3)) // 返回List<List<T>> 每3个元素作为一个集合，从下一个元素开始又3个元素作集合，一次类推
+        println(numbers.windowed(3) {it.sum()}) //
+        println(numbers.windowed(15)) // 元素不够返回空
+        println(numbers.windowed(3, step = 2, partialWindows = true)) // partialWindows为真则最后不够3个元素的集合也会返回
+        println(numbers.windowed(3, step = 2, partialWindows = false)) // partialWindows为假则最后不够3个元素的集合不会返回
+        println("===1====")
+        println(numbers.zipWithNext()) // 返回List<Pair<T, T>> 步进为1, 前后两个元素组合为一个pair [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 10), (10, 11), (11, 12), (12, 13)]
+        println(numbers.zipWithNext {i1,i2 -> i1 > i2}) // 返回List<T>
+    }
+
+    @Test
+    fun testHandleCollection9() {
+        val numbers = linkedSetOf<Int>(1 , 2, 3, 4, 5)
+        println(numbers.elementAt(3)) // 4
+        println(numbers.elementAtOrNull(6)) // null
+        println(numbers.elementAtOrElse(6) { 10000 }) // 10000
+        println("====0=====")
+        println(numbers.first()) // 1
+        println(numbers.first { it > 2 }) // 3 按照条件取值
+        println(numbers.firstOrNull { it > 6 }) // null
+        println(numbers.find { it > 6 }) // null 同firstOrNull
+        println("====1=====")
+        println(numbers.last()) // 5
+        println(numbers.last { it < 4 }) // 3 按照条件取值
+        println(numbers.lastOrNull { it < 0 }) // null
+        println(numbers.findLast { it < 0 }) // null 同lastOrNull
+        println("====2=====")
+        println(numbers.random())
+        println(numbers.contains(2))
+        println( 4 in numbers)
+        println(numbers.containsAll(listOf(1, 2)))
+        println(numbers.isEmpty())
+        println(numbers.isNotEmpty())
+        println("====3=====")
+        val sortNumber = sortedSetOf("one", "two", "three", "four")
+        println(sortNumber.elementAt(0)) // four
+
+        //page 269
+    }
+
+    @Test
+    fun testHandleCollection10() {
+
+    }
 }
