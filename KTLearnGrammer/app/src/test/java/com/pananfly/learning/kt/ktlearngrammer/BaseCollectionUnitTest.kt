@@ -463,6 +463,47 @@ class BaseCollectionUnitTest {
 
     @Test
     fun testHandleCollection10() {
-
+        // 自定义排序
+        val stringComparator = Comparator { t: String, t2: String -> t.length - t2.length }
+        println(listOf("aaa", "bb", "c", "resaf").sortedWith(stringComparator))
+        println(listOf("aaa", "bb", "c", "resaf").sortedWith(compareBy {it.length})) // 简要实现，同上面的stringComparator
+        println("=====0=====")
+        val numbers = listOf("one", "two", "three", "four")
+        println("Sort ascending: ${numbers.sorted()}") // 升序
+        println("Sort by length ascending: ${numbers.sortedBy { it.length }}") // 升序
+        println("Sort descending: ${numbers.sortedDescending()}") // 降序
+        println("Sort by last letter descending: ${numbers.sortedByDescending { it.last() }}") // 降序
+        println("=====1=====")
+        println("reversed: ${numbers.reversed()}") // 倒序 [four, three, two, one]
+        println("as reversed: ${numbers.asReversed()}") // 倒序
+        val numbers2 = mutableListOf("one", "two", "three", "four")
+        val asReverNumber = numbers2.asReversed()
+        println(asReverNumber) // [four, three, two, one]
+        numbers2.add("five") // 当可变数组有改变时，asReversed() 产生的数组也会有相应的变化
+        println(asReverNumber) // [five, four, three, two, one]
+        println("=====2=====")
+        println("shuffled: ${numbers.shuffled()}") // 随机排序
     }
+
+    @Test
+    fun testHandleCollection11() {
+        val numbers = listOf(6, 42, 10, 4)
+        println("Count: ${numbers.count()} -- size:${numbers.size}") // 集合的元素的数量
+        println("Max: ${numbers.max()}")
+        println("Min: ${numbers.min()}")
+        println("Sum: ${numbers.sum()}")
+        println("Average: ${numbers.average()}")
+        println("Min by: ${numbers.minBy { it % 3 }}")
+        println("4%3: ${4 % 3}")
+        println("10%3: ${10 % 3}")
+        println("max with: ${numbers.maxWith(compareBy {it % 3})}") // 10和4模3都是1，为啥就结果是10，难道是以第一个为主吗？？？
+        println("sum by: ${numbers.sumBy { it * 2 }}")
+        println("sum by double: ${numbers.sumByDouble { it.toDouble() * 2 }}")
+        // page 274
+        println("Sum by reduce: ${numbers.reduce { sum, element -> sum + element }}")  // reduce 第一次的sum是第一个元素，element是第二个元素
+        println("Sum by fold: ${numbers.fold(0) {sum, element -> sum + element * 2}}") // fold 第一次的sum是指定的初始值，element是第一个元素
+        println("Sum by reduce 2: ${numbers.reduce{sum, element -> sum + element * 2}}") // j结果有出入，第一个元素并不参与倍数2的操作
+        // page 275
+    }
+
 }
