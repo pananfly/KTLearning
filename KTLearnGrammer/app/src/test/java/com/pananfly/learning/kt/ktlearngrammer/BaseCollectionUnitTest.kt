@@ -502,8 +502,104 @@ class BaseCollectionUnitTest {
         // page 274
         println("Sum by reduce: ${numbers.reduce { sum, element -> sum + element }}")  // reduce 第一次的sum是第一个元素，element是第二个元素
         println("Sum by fold: ${numbers.fold(0) {sum, element -> sum + element * 2}}") // fold 第一次的sum是指定的初始值，element是第一个元素
-        println("Sum by reduce 2: ${numbers.reduce{sum, element -> sum + element * 2}}") // j结果有出入，第一个元素并不参与倍数2的操作
+        println("Sum by reduce 2: ${numbers.reduce{sum, element -> sum + element * 2}}") // 结果有出入，第一个元素并不参与倍数2的操作
         // page 275
+
+        println("Sum by reduceRight: ${numbers.reduceRight{element, sum -> sum + element}}") // reduceRight第一次的sum是最后一个元素，element是倒数第二个元素，注意和reduce的lambda表达式的区别，sum和element位置有区别
+        println("Sum by foldRight: ${numbers.foldRight(0){element, sum -> sum + element}}") // reduceRight第一次的sum是初始化值，element是倒数第一个元素，注意和foldRight的lambda表达式的区别，sum和element位置有区别
+        println("Sum by foldIndexed: ${numbers.foldIndexed(0){idx, sum, element -> if(idx % 2 == 0) sum + element else sum}}") //16： 0 + 6 + 10
+        println("Sum by foldRightIndexed: ${numbers.foldRightIndexed(0){idx, element, sum -> if(idx % 2 == 0) sum + element else sum}}") //16： 0 + 10 + 6
+        println("Sum by reduceIndexed: ${numbers.reduceIndexed{idx, sum, element -> if(idx % 2 == 0) sum + element else sum}}") // 16： 6 + 10
+        println("Sum by reduceRightIndexed: ${numbers.reduceRightIndexed{idx, element, sum -> if(idx % 2 == 0) sum + element else sum}}") // 20： 4 + 10 + 6， 4是第一个sum
+    }
+
+    @Test
+    fun testHandleCollection12() {
+        val numbers = mutableListOf<Int>(1, 2, 3, 4)
+        numbers.add(5)
+        numbers.addAll(arrayListOf(6, 7, 8))
+        println("1: $numbers")
+        numbers.addAll(2, setOf(9, 10))// 在2位置添加2个元素，原本在集合中2后面的元素向后挪位置
+        println("2: $numbers")
+        numbers += 11
+        numbers += listOf<Int>(12, 13)
+        println("3: $numbers")
+        numbers.remove(3) // 直接删除元素
+        println("4: $numbers")
+        numbers.remove(100) // 不存在则不做处理
+        println("5: $numbers")
+        var ret = numbers.removeAll { it == 2 } // 移除符合条件的元素
+        println("removeAll: ${numbers}, ret: $ret")
+        ret = numbers.removeAll(setOf(1, 2)) // 移除所给集合中的的元素, 2不存在则不处理
+        println("removeAll 1, 2: ${numbers}, ret: $ret")
+        ret = numbers.retainAll {it % 3 == 0} // 返回符合条件的元素
+        println("retainAll: $numbers, ret: $ret")
+        numbers += listOf<Int>(109, 111, 110, 121, 221, 121)
+        numbers -= 110 // 只删除第一个符合的元素
+        println("6: $numbers")
+        numbers -= setOf<Int>(111, 121) // 删除第二个操作中，在第一个操作所有符合的元素
+        println("7: $numbers")
+        numbers.clear() // 移除所有的元素并置空
+        println("8: $numbers")
+    }
+
+    @Test
+    fun testHandleCollection13() {
+        var numbers = mutableListOf<String>("one", "two", "three")
+        numbers[1] = "www"
+        println(numbers)
+        numbers.sortWith(compareBy<String> {it.length}.thenBy { it })
+        println(numbers)
+        numbers.removeAt(1)
+        println(numbers)
+        numbers.fill("pananfly") // 所有元素都赋值一样
+        println(numbers)
+        numbers.apply { this.forEachIndexed{ index, s -> set(index, s + index) } }
+        println(numbers)
+    }
+
+    @Test
+    fun testHandleCollection14() {
+        val numbers = setOf<String>("one", "two", "three")
+        println(numbers union setOf("four", "five")) // set 的联合操作
+        println(numbers intersect setOf("three", "four")) // set 的交集操作，查找跟另一个集合中有同样的元素
+        println(numbers subtract setOf("three", "four")) // set 的差集操作, 查找另一个集合中不存在的元素
+    }
+
+    @Test
+    fun testHandleCollection15() {
+        val numbersMap = mapOf("one" to 1, "two" to 2, "three" to 3)
+        println(numbersMap.get("one"))
+        println(numbersMap["one"])
+        println(numbersMap.getOrDefault("on", 0))
+        println(numbersMap.keys)
+        println(numbersMap.values)
+        println(numbersMap.filter { (k,_) -> k.contains("t") })
+        println(numbersMap.filterKeys { it.contains("t") })
+        println(numbersMap.filterValues { it != 2 })
+        println(numbersMap + Pair("123", 123))
+        println(numbersMap + Pair("one", 11))
+        println(numbersMap + mapOf("one" to 11))
+        println("====0=====")
+        val numbers = mutableMapOf<String, Int>("one" to 1, "two" to 2)
+        numbers["three"] = 3
+        numbers.putAll(setOf("four" to 4, "five" to 5))
+        println("1:$numbers")
+        numbers += mapOf<String, Int>("six" to 6)
+        println("2:$numbers")
+        numbers.remove("one")
+        println("3:$numbers")
+        numbers.remove("four", 5) // 键或者值，某一个不对应就不会删除
+        println("4:$numbers")
+        numbers.keys.remove("two") // 通过键删除
+        println("5:$numbers")
+        numbers.values.remove(6) // 通过值删除
+        println("6:$numbers")
+        numbers -= "three" // 通过键删除
+        println("7:$numbers")
+        numbers -= "ssss" // 通过键删除, 不存在不影响
+        println("8:$numbers")
+        // page 291
     }
 
 }
