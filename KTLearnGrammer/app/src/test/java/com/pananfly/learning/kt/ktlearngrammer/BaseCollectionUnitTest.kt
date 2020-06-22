@@ -1,5 +1,6 @@
 package com.pananfly.learning.kt.ktlearngrammer
 
+import android.view.View
 import org.junit.Test
 
 class BaseCollectionUnitTest {
@@ -601,5 +602,33 @@ class BaseCollectionUnitTest {
         println("8:$numbers")
         // page 291
     }
+
+    lateinit var listener: ITest
+
+    interface ITest {
+        fun onTest()
+        fun onBack()
+    }
+
+    fun pwd(func: ((String) -> Unit)) {
+        this.listener = object:ITest {
+
+            override fun onTest() {
+                func.invoke("123")
+            }
+
+            override fun onBack() {
+                func.invoke("abcd")
+            }
+        }
+    }
+
+    @Test
+    fun testFunc() {
+        pwd { str -> println(str) }
+        this.listener?.onTest()
+        this.listener?.onBack()
+    }
+
 
 }

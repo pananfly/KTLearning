@@ -299,7 +299,7 @@ class BaseTypeUnitTest {
             if(it == 3) return
             println(it)
         }
-        println("Un reach end.")
+        println("Un reach end 1.")
     }
 
     private fun testBreakAndContinueLabelFoo2() {
@@ -308,7 +308,7 @@ class BaseTypeUnitTest {
             if(it == 3) return@lit
             println(it)
         }
-        println("reach end.")
+        println("reach end 2.")
     }
 
     private fun testBreakAndContinueLabelFoo3() {
@@ -317,7 +317,7 @@ class BaseTypeUnitTest {
             if(it == 3) return@forEach
             println(it)
         }
-        println("reach end.")
+        println("reach end 3.")
     }
 
     private fun testBreakAndContinueLabelFoo4() {
@@ -326,7 +326,7 @@ class BaseTypeUnitTest {
             if(value == 3) return
             println(value)
         })
-        println("reach end.")
+        println("reach end 4.")
     }
 
     private fun testBreakAndContinueLabelFoo5() {
@@ -337,7 +337,7 @@ class BaseTypeUnitTest {
                 println(it)
             }
         }
-        println("reach end.")
+        println("reach end 5.")
     }
 
     private fun testBreakAndContinueLabelFoo6() {
@@ -349,7 +349,7 @@ class BaseTypeUnitTest {
             }
             return@loop 0
         }
-        println("reach end xx:$xx.")
+        println("reach end xx:$xx 6.")
     }
 
     @Test
