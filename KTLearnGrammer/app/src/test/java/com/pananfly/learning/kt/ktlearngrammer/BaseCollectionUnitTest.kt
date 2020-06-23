@@ -226,7 +226,7 @@ class BaseCollectionUnitTest {
         val numberSequence2 = nums.asSequence() // 从Iterable创建
         val oddNumbers = generateSequence(1) { it + 2} // 函数创建，此序列是无限的，it是上一个元素的值，所以lambda表达式的操作只对第二个及之后的元素有作用
         println(oddNumbers.take(5).toList())
-        val oddNumbers2 = generateSequence(1){ if(it < 10) it + 2 else null } // 最后返回null则会创建一个有效的序列
+        val oddNumbers2 = generateSequence(1){ if(it < 10) it + 2 else null } // 最后返回null则会创建一个有限的序列
         println("size: ${oddNumbers2.count()} -> ${oddNumbers2.toList()}")
         val blockSequences = sequence {
             yield(1)
@@ -422,7 +422,7 @@ class BaseCollectionUnitTest {
         println(numbers.chunked(3) {it.sum()}) // 返回List<T>
         println(numbers.chunked(15)) // 大于当前总数量，则内部list只有一个集合，不会为空
         println("===0====")
-        println(numbers.windowed(3)) // 返回List<List<T>> 每3个元素作为一个集合，从下一个元素开始又3个元素作集合，一次类推
+        println(numbers.windowed(3)) // 返回List<List<T>> 每3个元素作为一个集合，从下一个元素开始又3个元素作集合，依此类推
         println(numbers.windowed(3) {it.sum()}) //
         println(numbers.windowed(15)) // 元素不够返回空
         println(numbers.windowed(3, step = 2, partialWindows = true)) // partialWindows为真则最后不够3个元素的集合也会返回
