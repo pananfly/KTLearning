@@ -1,6 +1,8 @@
+@file:JvmName("BaseMoreUnitTest") // 必须在顶层切必须在package之前
 package com.pananfly.learning.kt.ktlearngrammer
 
 import org.junit.Test
+import kotlin.reflect.KClass
 
 class BaseMoreUnitTest {
     data class Result(val result: Int, val status: String)
@@ -37,4 +39,152 @@ class BaseMoreUnitTest {
 
         // page 431
     }
+
+    fun testGeneric1(some: Any?) {
+        if(some is List<*>) {
+            some.forEach {
+                println(it) // it-> Any?
+            }
+        }
+//        if(some is ArrayList<String>) { // 不能类型擦除为某种具体的类型
+//
+//        }
+    }
+
+    fun testGeneric2(some: List<String>) {
+        if(some is ArrayList) { // 此处类型判断可省略范型指定
+            // some 在这里会自动转换为Array<String>
+        }
+        some as ArrayList
+    }
+
+    inline fun <reified A, reified B> Pair<*, *>.asPairOf(): Pair<A, B>? {
+        if(first !is A || second !is B) return null
+        return first as A to second as B
+    }
+    inline fun <reified T> List<*>.asListOfType(): List<T>? =
+        if(all {it is T})
+            @Suppress("UNCHECKED_CAST")
+            this as List<T>
+        else null
+
+    @Test
+    fun testGeneric3() {
+        val some: Pair<Any?, Any?> = "items" to listOf(1, 2, 3)
+        println(some)
+        val stringToSome = some.asPairOf<String, Any>()
+        println("stringToSome: $stringToSome")
+        val stringToInt = some.asPairOf<String, Int>()
+        println("stringToInt: $stringToInt") // null
+        val stringToList = some.asPairOf<String, List<*>>()
+        println("stringToList: $stringToList") //
+        val stringToListString = some.asPairOf<String, List<String>>() // 破坏类型安全
+        println("stringToListString: $stringToListString") //
+    }
+
+    class ThisA {
+        val a1 = 1
+        inner class ThisB {
+            val b1 = 2
+            fun Int.foo() {
+                val a = this@ThisA // ThisA的this
+                val b = this@ThisB // THisB的this
+                val c = this // foo()的接收者，一个Int
+                val c1 = this@foo // foo()的接收者，一个Int
+
+                val funLit = lambda@ fun String.() {
+                    val d = this // funLit的接收者
+                    return@lambda
+                }
+                val funLit2 = {
+                    s: String -> val e = this // foo()的接收者，因为包含的lambda表达式没有任何接收者
+                }
+                funLit2("123")
+            }
+        }
+    }
+
+    @Test
+    fun testEqual() {
+        val a: Any? = null
+        val b = null
+        println(a == b) // 结构相等比较
+        println(a === b) // 饮用相等比较
+        println(a?.equals(b) ?: (b === null)) // b == null 跟 b === null 是等价的，只有跟null或者原生类型之间比较时才等价
+    }
+
+    operator fun Point.unaryMinus() = Point(-x, -y) // -Point
+    // 一元操作符重载
+    data class Point(var x: Int, var y: Int)
+    operator fun Point.unaryPlus() = Point(+x, +y) // +Point
+//    operator fun Point.not() = Point(!x, !y) // !Point
+//    operator fun Point.inc(): Point = Point(x++, y++) // Point++
+//    operator fun Point.dec(): Point = Point(x--, y--) // Point--
+
+    // 二元操作符
+    operator fun Point.plus(point: Point): Point = Point(x + point.x, y + point.y) // Point + Point
+    operator fun Point.minus(point: Point): Point = Point(x - point.x, y - point.y) // Point - Point
+    operator fun Point.times(point: Point): Point = Point(x * point.x, y * point.y) // Point * Point
+    operator fun Point.div(point: Point): Point = Point(x = if(point.x == 0) 0 else (x / point.x), y = if(point.y == 0) 0 else (y / point.y)) // Point / Point
+    operator fun Point.rem(point: Point): Point = Point(x = if(point.x == 0) 0 else (x % point.x), y = if(point.y == 0) 0 else (y % point.y)) // Point % Point
+    operator fun Point.rangeTo(point: Point): List<Point> = Point(x, y)..Point(point.x, point.y) // Point .. Point
+//    operator fun Point.contains(point: Point): Boolean = this in point // Point in Point
+//    operator fun Point.contains(point: Point): Boolean = this !in point // Point !in Point
+//    operator fun Point.plusAssign(point: Point): Point =  // Point !in Point
+
+    @Test
+    fun testNullAble() {
+        var a: String? = "123"
+        a = null
+        val len = if( a != null) a.length else 0
+        val list = listOf<String?>("123", null)
+        for(l in list) {
+            l?.let { println(it) }
+        }
+
+        //Elvis 操作符
+        val len2 = a?.length ?: 0
+
+//        val aLen = a!!.length // !!非空断言如果a为null则会抛出异常
+
+        val aInt: Int? = a as? Int // 转换不成功会返回null
+        println("aInt:$aInt")
+
+        //可空类型的集合
+        val nullableList: List<Int?> = listOf(1, null, 3, 4)
+        val notNullList = nullableList.filterNotNull()
+        println("notNullList:$notNullList")
+    }
+
+    //nothing可以标记成一个不会返回的函数，当你调用此函数时，编译器将不会继续向下执行
+    fun fail(msg: String): Nothing {
+        throw IllegalStateException(msg)
+    }
+
+    @Target(AnnotationTarget.CLASS, AnnotationTarget.CONSTRUCTOR, AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.EXPRESSION)
+    @Retention(AnnotationRetention.SOURCE)
+    @MustBeDocumented
+    annotation class Fancy
+
+    @Fancy class FooInject {
+        @Fancy fun foo( @Fancy foo: Int): Int {
+            return (@Fancy 1)
+        }
+    }
+
+    annotation class ReplaceWith(val msg: String)
+
+    annotation class Deprecated(
+        val msg: String,
+        val replaceWith: ReplaceWith = ReplaceWith("")
+    )
+
+    annotation class Ann(val arg1: KClass<*>, val arg2: KClass<out Any>)
+    // kotlin 自动将其转换为java类型
+    @Ann(String::class, Int::class) class MyClass
+
+    annotation class Suspendable
+    // 此注解会应用在该表达式的invoke()方法上
+    val f = @Suspendable { println("123") }
+
 }
