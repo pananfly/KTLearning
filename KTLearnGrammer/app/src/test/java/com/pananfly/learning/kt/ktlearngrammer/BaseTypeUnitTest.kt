@@ -384,7 +384,23 @@ class BaseTypeUnitTest {
         testBreakAndContinueLabelFoo5()
         println("====7=====")
         testBreakAndContinueLabelFoo6()
-
+        println("====8=====")
+        val aaa = listOf<Int>(1, 2, 3).filter {
+            return@filter it > 1
+        }
+        println("aaa=$aaa")
+        val bbb = listOf<Int>(1, 2, 3).filter {
+            it > 1
+        }
+        println("bbb=$bbb")
+        data class Task(val content: String)
+        var task: Task? = null
+        for(i in 0..10) {
+            task = if( i % 2 == 1 ) Task("$i 666") else null
+            if(task?.content != null) break
+            println("$i ++ ${task?.toString()}")
+        }
+        println("task: ${task?.toString()}")
         // page 135
     }
 }

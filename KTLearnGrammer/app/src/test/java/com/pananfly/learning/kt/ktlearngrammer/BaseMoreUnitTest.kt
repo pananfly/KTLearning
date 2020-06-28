@@ -1,8 +1,11 @@
 @file:JvmName("BaseMoreUnitTest") // 必须在顶层切必须在package之前
 package com.pananfly.learning.kt.ktlearngrammer
 
+import android.view.View
 import org.junit.Test
 import kotlin.reflect.KClass
+import kotlin.reflect.jvm.javaField
+import kotlin.reflect.jvm.javaGetter
 
 class BaseMoreUnitTest {
     data class Result(val result: Int, val status: String)
@@ -186,5 +189,83 @@ class BaseMoreUnitTest {
     annotation class Suspendable
     // 此注解会应用在该表达式的invoke()方法上
     val f = @Suspendable { println("123") }
+
+    class ReflectClass(val x: Int) {
+        fun filterInt(y: Int) = y % 2 != 0
+    }
+
+    fun filterInt(x: Int) = x % 2 != 0
+    fun stringLen(s: String) = s.length
+    fun <A, B, C> composeFilter(f: (B) -> C, g: (A) -> B): (A) -> C {
+        return {x -> f(g(x))}
+    }
+
+    var xVar = 100
+
+    val String.lastChar: Char get() = this[length] - 1
+
+    @Test
+    fun testReflect() {
+        val reflect = ReflectClass(123)
+        val c = ReflectClass::class // kclass
+        println(c)
+        val c1 = ReflectClass::class.java // kclass<T>, java类引用
+        println(c1)
+        val d = c.qualifiedName //
+        println(d)
+        println("=====0=====")
+
+        val numbers = listOf<Int>(1, 2, 3, 4)
+        // 函数引用
+        println(numbers.filter(::filterInt)) // ::filterInt是(Int) -> Boolean的一个值
+        val filterIntRef: ReflectClass.(Int) -> Boolean = ReflectClass::filterInt // 类的方法引用
+        val ret = filterIntRef(reflect, 2) // false 这种要先传一个类的实体，再传参才行
+        println(ret)
+        println("=====1=====")
+        val strings = listOf<String>("a", "ab", "abc", "abcd")
+        println(strings.filter(composeFilter(::filterInt, ::stringLen)))
+
+        println("=====2=====")
+        //属性引用
+        println(::xVar.get()) // 不能在调用处内部定义的
+        println(::xVar.name)
+        ::xVar.set(-19)
+        println(::xVar.get())
+
+        println("=====3=====")
+        // 访问类的成员属性
+        val reflectClassProp = ReflectClass::x
+        println(reflectClassProp.get(reflect))
+        // 扩展函数的属性
+//        println(String::lastChar.get("123")) // 这里报错
+        println(ReflectClass::x.javaGetter)
+        println(ReflectClass::x.javaField)
+
+        println("====4====")
+        // 构造函数引用
+        fun constructorRef(factory: (Int) -> ReflectClass): ReflectClass {
+            val x: ReflectClass = factory(1)
+            return x
+        }
+        constructorRef(::ReflectClass) // 引用构造函数
+
+        println("====5====")
+        val numberRegex = "^\\d+$".toRegex()
+        val isNumber = numberRegex::matches
+        println("isNumber: ${isNumber("23")}")
+        val numberList = listOf<String>("abc", "1234", "6", "ft56")
+        println(numberList.filter(isNumber))
+        val matches: (Regex, CharSequence) -> Boolean = Regex::matches
+        println(matches(numberRegex, "123")) // true
+
+
+        // inner类的引用通过外部类的实例来获得
+        class Outer {
+            inner class Inner
+        }
+        val o = Outer()
+        val innerRef = o::Inner // 或者inner类的引用
+        // page 463
+    }
 
 }
