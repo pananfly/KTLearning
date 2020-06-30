@@ -268,4 +268,41 @@ class BaseMoreUnitTest {
         // page 463
     }
 
+    @Test
+    fun testScopeFunc() {
+        //作用域函数
+        // 上下文对象 this: run, with, apply.  it: let, also.
+        // 返回值 上下文对象: apply, also. lambda表达式结果: let, run, with.
+        val str = "pananfly"
+        var ret: Any? = null
+        ret = str.run {
+            println(this)
+            123
+        }
+        println("run ret: $ret") // 123 --> lambda结果
+        ret = with(str) {
+            println(this)
+            234
+        }
+        println("with ret: $ret") // 234 --> lambda结果
+        ret = str.apply {
+            println(this)
+            345
+        }
+        println("apply ret: $ret") // pananfly --> 上下文
+        ret = str.let {
+            s ->
+                println("$s, ${s.length}")
+                456
+        }
+        println("let ret: $ret") // 456 --> lambda结果
+        ret = str.also {
+             s ->
+                println("$s, ${s.length}")
+                567
+        }
+        println("also ret: $ret") // pananfly --> 上下文
+        // page 464
+    }
+
 }
