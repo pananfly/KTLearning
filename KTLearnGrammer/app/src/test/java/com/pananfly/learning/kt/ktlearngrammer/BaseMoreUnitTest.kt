@@ -305,4 +305,54 @@ class BaseMoreUnitTest {
         // page 464
     }
 
+    data class Person(var name: String, var age: Int = 0, var city: String = "") {
+        fun moveTo(newCity: String) { city = newCity }
+        fun increaseAge() { age ++ }
+    }
+
+    @Test
+    fun testScopeFunc2() {
+        var person = Person("pananfly", 18, "CN CN").let {
+            println(it)
+            it.moveTo("CN CN2")
+            it.increaseAge()
+            println(it)
+            it.age = 200
+            it // 返回值
+        }
+        println("person: $person")
+
+        fun queryAge() = 20
+        var person2 = Person("pananfly").apply {
+            age = queryAge()
+            city = "CN CN3"
+        }
+        println("person2: $person2")
+
+        println("=====0=====")
+
+        var list = mutableListOf<Double>()
+        list.also { println("List first.") }
+            .apply {
+                add(1.02)
+                add(4.50)
+                add(3.09)
+            }
+            .also {
+                println("Sort list.")
+            }
+            .sort()
+        println("list: $list")
+
+        println("=====1=====")
+        var numbers = mutableListOf<String>("one", "two", "three")
+        val counts = numbers.run {
+            add("four")
+            add("five")
+            count { it.endsWith("e") }
+        }
+        println(counts)
+        // page 468
+    }
+
 }
