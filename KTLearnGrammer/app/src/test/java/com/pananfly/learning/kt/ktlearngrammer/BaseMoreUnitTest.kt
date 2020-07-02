@@ -353,6 +353,85 @@ class BaseMoreUnitTest {
         }
         println(counts)
         // page 468
+
+        with(numbers) {
+            println("First element: ${first()}, last element: ${last()}")
+        }
+
+        println("=====2=====")
+        numbers.map { it.length }.filter { it > 3 }.let { println(it) }
+        numbers.map { it.length }.filter { it > 3 }.let (::println)
+
+        println("=====3=====")
+
+        var str1: String = "pananfly"
+        val len1 = str1?.let { it.length }
+        println(len1)
+
+        println("=====4=====")
+
+        class MultiportService(var url: String, var port: Int) {
+            fun prepareRequest(): String = "Default request"
+            fun query(request: String): String = "Result for query '$request'"
+        }
+
+        val service: MultiportService = MultiportService("www.pananfly.com", 80)
+        val queryResult = service.run {
+            port = 8080
+            query(prepareRequest() + " to port $port")
+        }
+        println(queryResult)
+        val queryResult2 = service.let {
+            it.port = 8090
+            it.query(it.prepareRequest() + " to port ${it.port}")
+        }
+        println(queryResult2)
+        val hexNumberRegex = kotlin.run {
+            val digits = "0-9"
+            val hexDigits = "A-Fa-f"
+            val sign = "+-"
+            Regex("[$sign]?[$digits$hexDigits]+")
+        }
+        for (match in hexNumberRegex.findAll("+1234 -FFFF not-a-number")) {
+            println(match.value)
+        }
+
+        println("=====5=====")
+        val str2 = "pananfly2"
+        val caps = str2.takeIf { it.isNotEmpty() }?.toUpperCase() // 匹配则返回，否则null
+        println("caps: $caps")
+        val caps2 = str2.takeUnless { it.isNotEmpty() }?.toUpperCase() //不匹配则返回，否则null
+        println("caps2: $caps2")
+        str2.indexOf("yy").takeIf { it > 0 }?.let(::println) // 不会有任何打印
+        str2.indexOf("ly").takeIf { it > 0 }?.let(::println) // 打印 6
+
     }
 
+    @DslMarker
+    annotation class HtmlTagMaker
+
+    @HtmlTagMaker
+    abstract class Tag(val name: String) {}
+
+    class HTML() : Tag("html") {
+        fun head(init: Head.() -> Unit) {
+
+        }
+    }
+    class Head() : Tag("head") {}
+    fun html(init: HTML.() -> Unit): HTML {
+        val html = HTML()
+        html.init()
+        return html
+    }
+
+    fun TestSDL() {
+        html {
+            head {
+
+            }
+        }
+
+        // page 490
+    }
 }
