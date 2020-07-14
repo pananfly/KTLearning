@@ -1,6 +1,7 @@
 package com.pananfly.learning.kt.ktlearngrammer
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.*
 import org.junit.Test
 import kotlin.system.measureTimeMillis
 
@@ -732,4 +733,456 @@ class BaseCoroutinesUnitTest {
             Post-main, current thread: Thread[main @coroutine#1,5,main], thread local value: 'main'
         """.trimIndent()
     }
+
+    private fun flowEmitInteger() = flow {
+        for (i in 1..3) {
+            delay(100) // 假装我们在这里做了一些有用的事情
+            emit(i) // 发送下一个值
+        }
+    }
+
+    @Test
+    fun testFlow1() = runBlocking<Unit> {
+        // 启动并发的协程以验证主线程并未阻塞
+        launch {
+            for (k in 1..3) {
+                println("I'm not blocked $k")
+                delay(100)
+            }
+        }
+        // 收集这个流
+        flowEmitInteger().collect { value -> println(value) }
+
+        // 在不阻塞主线程的情况下执行
+        """
+            I'm not blocked 1
+            1
+            I'm not blocked 2
+            2
+            I'm not blocked 3
+            3
+        """.trimIndent()
+
+        """
+            名为 flow 的 Flow 类型构建器函数。
+            flow { ... } 构建块中的代码可以挂起。
+            函数 flowEmitInteger() 不再标有 suspend 修饰符。
+            流使用 emit 函数 发射 值。
+            流使用 collect 函数 收集 值。
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow2() = runBlocking<Unit> {
+        val flow = flowEmitInteger()
+        println("Before.")
+        flow.collect { value -> println(value) }
+        println("After.")
+
+        // 流只有在开始收集的时候才会执行
+        """
+            Before.
+            1
+            2
+            3
+            After.
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow3() = runBlocking<Unit> {
+        withTimeoutOrNull(250) {
+            flowEmitInteger().collect { value -> println(value) }
+        }
+
+        // 取消流的执行，当只有流有挂起操作如delay时才能被取消
+        """
+            1
+            2
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow4() = runBlocking<Unit> {
+            (1..3).asFlow().collect { value -> println(value) }
+        // 使用 .asFlow() 扩展函数，可以将各种集合与序列转换为流
+        """
+            1
+            2
+            3
+        """.trimIndent()
+    }
+
+    suspend fun performRequest(request: Int): String {
+        delay(1000) // 模仿长时间运行的异步工作
+        return "response $request"
+    }
+
+    @Test
+    fun testFlow5() = runBlocking<Unit> {
+        (1..3).asFlow()
+            .map { request -> performRequest(request) }
+            .collect { value -> println(value) }
+        // map操作映射
+        """
+            response 1
+            response 2
+            response 3
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow6() = runBlocking<Unit> {
+        (1..3).asFlow()
+            .transform { request ->
+                emit("Making request $request")
+                emit(performRequest(request))
+            }
+            .collect { value -> println(value) }
+        // 使用 transform 操作符，我们可以 发射 任意值任意次
+        """
+            Making request 1
+            response 1
+            Making request 2
+            response 2
+            Making request 3
+            response 3
+        """.trimIndent()
+    }
+
+    fun numbers(): Flow<Int> = flow {
+        try {
+            emit(1)
+            emit(2)
+            println("This line will not execute")
+            emit(3)
+        } finally {
+            println("Finally in numbers")
+        }
+    }
+
+    @Test
+    fun testFlow7() = runBlocking<Unit> {
+        numbers()
+            .take(2) // 只获取前两个
+            .collect { value -> println(value) }
+
+        // take限长操作符，只取结果的其中几个值。
+        // 限长过渡操作符（例如 take）在流触及相应限制的时候会将它的执行取消。
+        // 协程中的取消操作总是通过抛出异常来执行，这样所有的资源管理函数（如 try {...} finally {...} 块）会在取消的情况下正常运行
+        """
+            1
+            2
+            Finally in numbers
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow8() = runBlocking<Unit> {
+        val sum = (1..5).asFlow()
+            .map { it * it } // 数字 1 至 5 的平方
+            .reduce { a, b -> a + b } // 求和（末端操作符）
+        println(sum)
+
+        // 末端流操作符，操作完后只返回一个值
+    }
+
+    @Test
+    fun testFlow9() = runBlocking<Unit> {
+        (1..5).asFlow()
+            .filter {
+                println("Filter $it")
+                it % 2 == 0
+            }
+            .map {
+                println("Map $it")
+                "string $it"
+            }.collect {
+                println("Collect $it")
+            }
+
+        // 流是连续的，按顺序执行
+        """
+            Filter 1
+            Filter 2
+            Map 2
+            Collect string 2
+            Filter 3
+            Filter 4
+            Map 4
+            Collect string 4
+            Filter 5
+        """.trimIndent()
+    }
+
+    fun fooFlow(): Flow<Int> = flow {
+        log("Started foo flow")
+        for (i in 1..3) {
+            emit(i)
+        }
+    }
+
+    @Test
+    fun testFlow10() = runBlocking<Unit> {
+        fooFlow().collect { value -> log("Collected $value") }
+
+        // flow { ... } 构建器中的代码运行在相应流的收集器提供的上下文中
+        """
+            [main @coroutine#1] Started foo flow
+            [main @coroutine#1] Collected 1
+            [main @coroutine#1] Collected 2
+            [main @coroutine#1] Collected 3
+        """.trimIndent()
+    }
+
+    fun fooFlow2(): Flow<Int> = flow {
+        // 在流构建器中更改消耗 CPU 代码的上下文的错误方式
+        withContext(Dispatchers.Default) {
+            for (i in 1..3) {
+                Thread.sleep(100) // 假装我们以消耗 CPU 的方式进行计算
+                emit(i) // 发射下一个值
+            }
+        }
+    }
+
+    @Test
+    fun testFlow11() = runBlocking<Unit> {
+        fooFlow2().collect { value -> log("Collected $value") }
+
+        // flow {...} 构建器中的代码必须遵循上下文保存属性，并且不允许从其他上下文中发射（emit）
+        """
+            java.lang.IllegalStateException: Flow invariant is violated:
+		Flow was collected in [CoroutineId(1), "coroutine#1":BlockingCoroutine{Active}@7c9bd77f, BlockingEventLoop@3bf371b8],
+		but emission happened in [CoroutineId(1), "coroutine#1":DispatchedCoroutine{Active}@593f65ab, DefaultDispatcher].
+		Please refer to 'flow' documentation or use 'flowOn' instead
+        """.trimIndent()
+    }
+
+    fun fooFlow3(): Flow<Int> = flow {
+        for (i in 1..3) {
+            Thread.sleep(100) // 假装我们以消耗 CPU 的方式进行计算
+            log("Emitting $i")
+            emit(i) // 发射下一个值
+        }
+    }.flowOn(Dispatchers.Default) // 在流构建器中改变消耗 CPU 代码上下文的正确方式
+
+    @Test
+    fun testFlow12() = runBlocking<Unit> {
+
+        fooFlow3().collect { value -> log("Collected $value") }
+
+        // 在不同的上下文发射数据需要使用flowOn, 创建新的协程来发射数据，另外使用Dispatchers.Main会有问题
+        """
+            [DefaultDispatcher-worker-2 @coroutine#2] Emitting 1
+            [main @coroutine#1] Collected 1
+            [DefaultDispatcher-worker-2 @coroutine#2] Emitting 2
+            [main @coroutine#1] Collected 2
+            [DefaultDispatcher-worker-2 @coroutine#2] Emitting 3
+            [main @coroutine#1] Collected 3
+        """.trimIndent()
+    }
+
+    fun fooFlow4(): Flow<Int> = flow {
+        for (i in 1..3) {
+            delay(100) // 假装我们异步等待了 100 毫秒
+            emit(i) // 发射下一个值
+        }
+    }
+
+    @Test
+    fun testFlow13() = runBlocking<Unit> {
+        var time = measureTimeMillis {
+            fooFlow4()
+                .collect { value ->
+                    delay(300) // 假装我们花费 300 毫秒来处理它
+                    println(value)
+                }
+        }
+        println("No buffer, time consume: $time")
+
+        // 出来一个值处理一个的时间消耗
+        """
+            1
+            2
+            3
+            No buffer, time consume: 1241
+        """.trimIndent()
+
+        time = measureTimeMillis {
+            fooFlow4()
+                .buffer()
+                .collect { value ->
+                    delay(300) // 假装我们花费 300 毫秒来处理它
+                    println(value)
+                }
+        }
+        println("With buffer, time consume: $time")
+        // 不等待收集的处理，以缓存形式收集发出的数据
+        """
+            1
+            2
+            3
+            With buffer, time consume: 1059
+        """.trimIndent()
+
+        time = measureTimeMillis {
+            fooFlow4()
+                .conflate()
+                .collect { value ->
+                    delay(300) // 假装我们花费 300 毫秒来处理它
+                    println(value)
+                }
+        }
+        println("With conflate, time consume: $time")
+        // 合并，只处理最新的那个数据
+        """
+            1
+            3
+            With conflate, time consume: 713
+        """.trimIndent()
+
+        time = measureTimeMillis {
+            fooFlow4()
+                .collectLatest { value ->
+                    println("Collecting $value")
+                    delay(300) // 假装我们花费 300 毫秒来处理它
+                    println("Done $value")
+                }
+        }
+        println("With collectLatest, time consume: $time")
+        // 只处理最新的值
+        """
+            Collecting 1
+            Collecting 2
+            Collecting 3
+            Done 3
+            With collectLatest, time consume: 703
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow14() = runBlocking<Unit> {
+        val nums = (1..3).asFlow() // 数字 1..3
+        val strs = flowOf("one", "two", "three", "four") // 字符串
+        nums.zip(strs) { a, b -> "$a -> $b" } // 组合单个字符串
+            .collect { println(it) } // 收集并打印
+
+        // 按照最短的来合并，多出来的不处理
+        """
+            1 -> one
+            2 -> two
+            3 -> three
+        """.trimIndent()
+
+    }
+
+    @Test
+    fun testFlow15() = runBlocking<Unit> {
+        val nums = (1..3).asFlow().onEach { delay(300) } // 发射数字 1..3，间隔 300 毫秒
+        val strs = flowOf("one", "two", "three").onEach { delay(400) } // 每 400 毫秒发射一次字符串
+        val startTime = System.currentTimeMillis() // 记录开始的时间
+        nums.zip(strs) { a, b -> "$a -> $b" } // 使用“zip”组合单个字符串
+            .collect { value -> // 收集并打印
+                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+            }
+
+        // zip合并会等待对应项的流到达才处理
+        """
+            1 -> one at 442 ms from start
+            2 -> two at 844 ms from start
+            3 -> three at 1245 ms from start
+        """.trimIndent()
+
+    }
+
+    @Test
+    fun testFlow16() = runBlocking<Unit> {
+        val nums = (1..3).asFlow().onEach { delay(300) } // 发射数字 1..3，间隔 300 毫秒
+        val strs = flowOf("one", "two", "three").onEach { delay(400) } // 每 400 毫秒发射一次字符串
+        val startTime = System.currentTimeMillis() // 记录开始的时间
+        nums.combine(strs) { a, b -> "$a -> $b" } // 使用“combine”组合单个字符串
+            .collect { value -> // 收集并打印
+                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+            }
+
+        // combine合并，两边每来一个新值就会合并一次
+        """
+            1 -> one at 450 ms from start
+            2 -> one at 651 ms from start
+            2 -> two at 853 ms from start
+            3 -> two at 952 ms from start
+            3 -> three at 1254 ms from start
+        """.trimIndent()
+
+    }
+
+    fun requestFlow(i: Int): Flow<String> = flow {
+        emit("$i: First")
+        delay(500) // 等待 500 毫秒
+        emit("$i: Second")
+    }
+
+    @Test
+    fun testFlow17() = runBlocking<Unit> {
+        var startTime = System.currentTimeMillis() // 记录开始时间
+        (1..3).asFlow().onEach { delay(100) } // 每 100 毫秒发射一个数字
+            .flatMapConcat { requestFlow(it) }
+            .collect { value -> // 收集并打印
+                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+            }
+
+        // 顺序执行
+        """
+            1: First at 149 ms from start
+            1: Second at 649 ms from start
+            2: First at 751 ms from start
+            2: Second at 1251 ms from start
+            3: First at 1352 ms from start
+            3: Second at 1854 ms from start
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow18() = runBlocking<Unit> {
+        var startTime = System.currentTimeMillis() // 记录开始时间
+        (1..3).asFlow().onEach { delay(100) } // 每 100 毫秒发射一个数字
+            .flatMapMerge { requestFlow(it) }
+            .collect { value -> // 收集并打印
+                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+            }
+
+        // 并发执行
+        // flatMapMerge 会顺序调用代码块（本示例中的 { requestFlow(it) }），但是并发收集结果流，相当于执行顺序是首先执行 map { requestFlow(it) } 然后在其返回结果上调用 flattenMerge
+        """
+            1: First at 166 ms from start
+            2: First at 257 ms from start
+            3: First at 359 ms from start
+            1: Second at 667 ms from start
+            2: Second at 758 ms from start
+            3: Second at 863 ms from start
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow19() = runBlocking<Unit> {
+        val startTime = System.currentTimeMillis() // 记录开始时间
+        (1..3).asFlow().onEach { delay(100) } // 每 100 毫秒发射一个数字
+            .flatMapLatest { requestFlow(it) }
+            .collect { value -> // 收集并打印
+                println("$value at ${System.currentTimeMillis() - startTime} ms from start")
+            }
+
+        // 这么骚的操作。。。。
+        // flatMapLatest 在一个新值到来时取消了块中的所有代码 (本示例中的 { requestFlow(it) }）。
+        // 这在该特定示例中不会有什么区别，由于调用 requestFlow 自身的速度是很快的，不会发生挂起， 所以不会被取消。
+        // 然而，如果我们要在块中调用诸如 delay 之类的挂起函数，这将会被表现出来
+        """
+            1: First at 163 ms from start
+            2: First at 311 ms from start
+            3: First at 413 ms from start
+            3: Second at 913 ms from start
+        """.trimIndent()
+    }
+
+
 }
