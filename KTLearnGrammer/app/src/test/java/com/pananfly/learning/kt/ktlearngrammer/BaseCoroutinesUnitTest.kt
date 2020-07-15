@@ -1184,5 +1184,187 @@ class BaseCoroutinesUnitTest {
         """.trimIndent()
     }
 
+    fun fooFlow5(): Flow<Int> = flow {
+        for (i in 1..3) {
+            println("Emitting $i")
+            emit(i) // 发射下一个值
+        }
+    }
 
+    @Test
+    fun testFlow20() = runBlocking<Unit> {
+        try {
+            fooFlow5().collect { value ->
+                println(value)
+                check(value <= 1) { "Collected $value" }
+            }
+        } catch (e: Throwable) {
+            println("Caught $e")
+        }
+
+        // 异常捕获用try{} catch() {}, 协程中判断条件用check, 为false则抛出异常
+        """
+            Emitting 1
+            1
+            Emitting 2
+            2
+            Caught java.lang.IllegalStateException: Collected 2
+        """.trimIndent()
+    }
+
+    fun fooFlow6(): Flow<String> =
+        flow {
+            for (i in 1..3) {
+                println("Emitting $i")
+                emit(i) // 发射下一个值
+            }
+        }
+        .map { value ->
+            check(value <= 1) { "Crashed on $value" }
+            "string $value"
+        }
+
+    @Test
+    fun testFlow21() = runBlocking<Unit> {
+        try {
+            fooFlow6().collect { value -> println(value) }
+        } catch (e: Throwable) {
+            println("Caught $e")
+        }
+
+        """
+            Emitting 1
+            1
+            Emitting 2
+            2
+            Caught java.lang.IllegalStateException: Collected 2
+        """.trimIndent()
+    }
+
+    @Test
+    fun testFlow22() = runBlocking<Unit> {
+        fooFlow5()
+            .catch { e -> println("Caught $e") } // 不会捕获下游异常
+            .collect { value ->
+                check(value <= 1) { "Collected $value" }
+                println(value)
+            }
+        // 程序异常退出
+        """
+            Emitting 1
+            1
+            Emitting 2
+
+            java.lang.IllegalStateException: Collected 2 at com.pananfly.learning.kt.ktlearngrammer.BaseCoroutinesUnitTest
+         """.trimIndent()
+    }
+
+    @Test
+    fun testFlow23() = runBlocking<Unit> {
+        fooFlow5().onEach { value ->
+            check(value <= 1) { "Collected $value" }
+            println(value)
+        }
+        .catch { e -> println("Caught $e") }
+        .collect()
+
+        // 能够主动捕获异常，程序安全运行到退出
+        """
+            Emitting 1
+            1
+            Emitting 2
+            Caught java.lang.IllegalStateException: Collected 2
+        """.trimIndent()
+    }
+
+    fun fooFlow7(): Flow<Int> = flow {
+        emit(1)
+        throw RuntimeException()
+    }
+
+    @Test
+    fun testFlow24() = runBlocking<Unit> {
+        try {
+            fooFlow5().collect { value -> println(value) }
+        } finally {
+            println("Done") // 完成时执行
+        }
+
+        println("===0====")
+        fooFlow5()
+            .onCompletion { println("Done") } // 完成时执行
+            .collect { value -> println(value) }
+
+        println("===1====")
+        fooFlow7()
+            .onCompletion { cause -> if (cause != null) println("Flow completed exceptionally") } // 有异常且异常不为null才打印
+            .catch { cause -> println("Caught exception") } // 有异常就会打印
+            .collect { value -> println(value) }
+
+        """
+            Emitting 1
+            1
+            Emitting 2
+            2
+            Emitting 3
+            3
+            Done
+            ===0====
+            Emitting 1
+            1
+            Emitting 2
+            2
+            Emitting 3
+            3
+            Done
+            ===1====
+            1
+            Flow completed exceptionally
+            Caught exception
+        """.trimIndent()
+
+        println("===2====")
+        (1..3).asFlow()
+            .onCompletion { cause -> println("Flow completed with $cause") }
+            .collect { value ->
+                check(value <= 1) { "Collected $value" }
+                println(value)
+            }
+
+        // 异常退出，但是在结束时onCompletion也会被调用
+        """
+            1
+            Flow completed with null
+
+            java.lang.IllegalStateException: Collected 2
+        """.trimIndent()
+    }
+
+    // 模仿事件流
+    fun events(): Flow<Int> = (1..3).asFlow().onEach { delay(100) }
+
+    @Test
+    fun testFlow25() = runBlocking<Unit> {
+        events()
+            .onEach { event -> println("Event: $event") }
+            .collect() // <--- 等待流收集
+        println("Done")
+
+        events()
+            .onEach { event -> println("Event: $event") }
+            .launchIn(this) // <--- 在单独的协程中执行流
+        println("Done")
+
+        // launchIn在单独的协程中执行，后面的Done会先打印
+        """
+            Event: 1
+            Event: 2
+            Event: 3
+            Done
+            Done
+            Event: 1
+            Event: 2
+            Event: 3
+        """.trimIndent()
+    }
 }
