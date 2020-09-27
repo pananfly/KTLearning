@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ServiceVideoPlayer</string>
+    <string name="next_video">Next video</string>
+</resources>

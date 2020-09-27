@@ -1,2 +1,3 @@
+include ':servicevideoplayer'
 rootProject.name='KTLearnGrammer'
 include ':app'
